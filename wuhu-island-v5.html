@@ -1,0 +1,2970 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>Wuhu Island — Wii Sports Resort</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;overflow:hidden;background:#55CCFF;touch-action:none;-webkit-user-select:none;user-select:none}
+canvas{display:block;filter:saturate(1.14) brightness(1.06)}
+#vignette{position:fixed;inset:0;pointer-events:none;z-index:2;background:radial-gradient(ellipse at 50% 40%,rgba(255,255,255,0) 38%,rgba(200,235,255,.06) 70%,rgba(160,210,255,.12) 100%)}
+#hud{position:fixed;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:flex-start;padding:10px 16px;pointer-events:none;z-index:10;flex-wrap:wrap;gap:6px}
+#left-hud{display:flex;flex-direction:column;gap:5px}
+#rc{font-family:'Arial Rounded MT Bold',Arial,sans-serif;font-size:22px;font-weight:900;color:#FFD700;text-shadow:2px 2px 0 #996600,0 0 10px rgba(255,200,0,.4);display:flex;align-items:center;gap:6px}
+#ri{width:22px;height:22px;border-radius:50%;background:radial-gradient(circle at 30% 30%,#FFE44D,#DAA520);border:2px solid #B8860B;box-shadow:0 0 6px rgba(255,200,0,.5)}
+#zone-hud{font-family:Arial,sans-serif;font-size:13px;font-weight:700;color:#fff;text-shadow:1px 1px 3px rgba(0,0,0,.7);background:rgba(0,0,0,.3);padding:4px 12px;border-radius:12px}
+#right-hud{display:flex;flex-direction:column;align-items:flex-end;gap:5px}
+#spd{font-family:Arial,sans-serif;font-size:13px;font-weight:700;color:rgba(255,255,255,.28);transition:all .2s}
+#spd.active{color:#00EEFF;text-shadow:0 0 8px #00CCFF}
+#tc{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;z-index:100;pointer-events:auto;background:rgba(0,15,55,.9);border:2px solid rgba(100,180,255,.35);border-radius:18px;padding:26px 38px;backdrop-filter:blur(10px)}
+#tc h1{font-family:'Arial Rounded MT Bold',Arial,sans-serif;font-size:38px;font-weight:900;color:#FFE566;text-shadow:3px 3px 0 #996600,0 0 22px rgba(255,220,0,.5);letter-spacing:2px;margin-bottom:2px}
+#tc h2{font-family:Arial,sans-serif;font-size:13px;color:#88DDFF;margin-bottom:10px;letter-spacing:4px}
+#tc p{font-family:Arial,sans-serif;font-size:11px;color:rgba(255,255,255,.72);margin-bottom:18px;line-height:1.85}
+#tc button{font-size:18px;font-weight:700;color:#fff;background:linear-gradient(135deg,#0088FF,#0044CC);border:3px solid #66AAFF;padding:12px 46px;border-radius:10px;cursor:pointer;font-family:Arial,sans-serif}
+#jz{position:fixed;bottom:18px;left:18px;z-index:20;width:115px;height:115px;pointer-events:auto}
+#jb{width:115px;height:115px;border-radius:50%;background:rgba(255,255,255,.08);border:2px solid rgba(255,255,255,.2);position:relative}
+#jsk{width:46px;height:46px;border-radius:50%;background:rgba(255,255,255,.28);border:2px solid rgba(255,255,255,.4);position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)}
+#jmp{position:fixed;bottom:35px;right:28px;z-index:20;width:64px;height:64px;border-radius:50%;background:rgba(0,150,255,.28);border:3px solid rgba(0,150,255,.5);color:#fff;font-family:Arial,sans-serif;font-size:10px;font-weight:900;display:flex;align-items:center;justify-content:center;pointer-events:auto}
+#bst{position:fixed;bottom:110px;right:28px;z-index:20;width:52px;height:52px;border-radius:50%;background:rgba(255,120,0,.28);border:3px solid rgba(255,120,0,.5);color:#fff;font-family:Arial,sans-serif;font-size:9px;font-weight:900;display:flex;align-items:center;justify-content:center;pointer-events:auto}
+#lz{position:fixed;inset:0;z-index:5;pointer-events:auto}
+#rp{position:fixed;top:38%;left:50%;transform:translate(-50%,-50%);font-family:'Arial Rounded MT Bold',Arial,sans-serif;font-size:22px;font-weight:900;pointer-events:none;z-index:15;opacity:0;transition:opacity .15s;text-shadow:2px 2px 4px rgba(0,0,0,.6)}
+#bf{position:fixed;inset:0;background:radial-gradient(circle,rgba(0,200,255,.1),transparent 70%);pointer-events:none;z-index:4;opacity:0;transition:opacity .25s}
+#notify{position:fixed;top:26%;left:50%;transform:translate(-50%,-50%);font-family:'Arial Rounded MT Bold',Arial,sans-serif;font-size:24px;font-weight:900;color:#FFE566;text-shadow:0 0 20px rgba(255,220,0,.8),2px 2px 0 #664400;pointer-events:none;z-index:16;opacity:0;transition:opacity .5s;text-align:center;max-width:80vw}
+#minimap{position:fixed;bottom:16px;right:16px;width:130px;height:130px;border-radius:50%;border:3px solid rgba(255,255,255,.4);background:rgba(0,20,60,.7);overflow:hidden;pointer-events:none;z-index:10}
+#minimap canvas{width:130px;height:130px}
+#dbg{position:fixed;top:60px;right:12px;font:11px/1.6 monospace;color:#00FF88;background:rgba(0,0,0,.65);padding:8px 12px;border-radius:8px;pointer-events:none;z-index:50;display:none;white-space:pre;border:1px solid rgba(0,255,136,.2)}
+@media(min-width:769px){#jz,#jmp,#bst,#lz{display:none}#dh{position:fixed;bottom:10px;left:50%;transform:translateX(-50%);font-family:Arial,sans-serif;font-size:11px;color:rgba(255,255,255,.35);pointer-events:none;z-index:10}}
+@media(max-width:768px){#tc h1{font-size:26px}#minimap{display:none}#dh{display:none}}
+</style>
+</head>
+<body>
+<div id="vignette"></div>
+<div id="tc">
+  <h1>WUHU ISLAND</h1><h2>WII SPORTS RESORT</h2>
+  <p>Follow the gold rings all the way around!<br>
+  Harbor → Red Iron Bridge → Wuhu Town<br>
+  Golf Trail → Hills → Volcano Tunnel<br>
+  Mysterious Ruins → Castle → Serpent Cove<br>
+  WASD / Mouse / Space=Jump / Shift=Boost</p>
+  <button id="sb">PLAY!</button>
+</div>
+<div id="hud" style="display:none">
+  <div id="left-hud"><div id="rc"><div id="ri"></div><span id="rn">0</span> Rings</div><div id="zone-hud">Harbor &amp; Docks</div></div>
+  <div id="right-hud"><div id="spd">BOOST</div></div>
+</div>
+<div id="rp"></div><div id="bf"></div><div id="notify"></div><div id="lz"></div>
+<div id="jz"><div id="jb"><div id="jsk"></div></div></div>
+<div id="jmp">JUMP</div><div id="bst">BOOST</div>
+<div id="minimap"><canvas id="mmcv" width="130" height="130"></canvas></div>
+<div id="dbg"></div>
+<div id="dh">WASD · Mouse · Space=Jump · Shift=Boost · Click=Lock · F3=Debug · Shift+R=Respawn</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){
+'use strict';
+
+// ══════════════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════════════
+let started=false,goldRings=0;
+let playerY=4,velY=0,onGround=true,jumpCount=0;
+let boosting=false,boostTimer=0,boostCooldown=0;
+const md={x:0,z:0};let jid=null;
+const BASE_SPD=18,BOOST_SPD=42,JV=12,JV2=9.5,GRV=-30,RD=3.4;
+let curSpeed=BASE_SPD;
+const rObjs=[],platforms=[];
+const mob=/Mobi|Android|iPhone|iPad/i.test(navigator.userAgent)||innerWidth<769;
+
+// Canonical Wuhu Island zones (matching the map image)
+// Layout: South=+Z, North=-Z, East=+X, West=-X
+// Sweet Beach: south-east
+// Wuhu Town: south-center
+// Harbor: east
+// Maka Wuhu Volcano: north-center
+// Summerstone Castle: north, behind falls
+// Red Iron Bridge: east of town
+// Pirate's Eye: west peninsula
+// Cocoba Hotel: east coast
+// Private Island: far west
+const ZONES=[
+  {name:'Sweet Beach',cx:120,cz:200,r:80},
+  {name:'Wuhu Town',cx:30,cz:140,r:75},
+  {name:'Seafront Promenade',cx:0,cz:200,r:65},
+  {name:'Harbor & Docks',cx:90,cz:80,r:65},
+  {name:'Red Iron Bridge',cx:80,cz:60,r:35},
+  {name:'Cocoba Hotel',cx:140,cz:30,r:50},
+  {name:'Maka Wuhu Volcano',cx:-20,cz:-80,r:90},
+  {name:'Summerstone Falls',cx:-30,cz:-30,r:55},
+  {name:'Summerstone Castle',cx:-60,cz:-120,r:60},
+  {name:"Pirate's Eye",cx:-140,cz:20,r:55},
+  {name:'West Cliffs',cx:-130,cz:80,r:55},
+  {name:'Forest Trail',cx:-70,cz:-50,r:60},
+  {name:'The Candle',cx:-110,cz:140,r:45},
+  {name:'Summit Ridge',cx:20,cz:-140,r:50},
+];
+let curZone='Harbor & Docks';
+
+// ══════════════════════════════════════════════════════
+// TEXTURES
+// ══════════════════════════════════════════════════════
+function mkT(w,h,fn){
+  const c=document.createElement('canvas');c.width=w;c.height=h;
+  const x=c.getContext('2d');const im=x.createImageData(w,h);
+  fn(im.data,w,h);x.putImageData(im,0,0);
+  const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;return t;
+}
+
+const sandTx=mkT(256,256,(d,w)=>{
+  for(let i=0;i<d.length/4;i++){
+    const p=i*4,n=(Math.random()-.5)*36,grit=Math.random()<.03?-26:0;
+    const px=i%w,py=i/w|0,dune=Math.sin(px*.04)*5+Math.cos(py*.03)*3;
+    d[p]=Math.min(255,Math.max(0,238+n+grit+dune));
+    d[p+1]=Math.min(255,Math.max(0,215+n*.9+grit+dune*.8));
+    d[p+2]=Math.min(255,Math.max(0,162+n*.55+grit*.5+dune*.4));
+    d[p+3]=255;
+  }
+});sandTx.repeat.set(18,18);
+
+// Wii Sports golf course grass — vivid bright green, subtle mow stripes
+const grassTx=mkT(256,256,(d,w,h)=>{
+  for(let y=0;y<h;y++)for(let x=0;x<w;x++){
+    const p=(y*w+x)*4;
+    // Alternating mow stripes every 16px (dark/light green bands)
+    const stripe=Math.floor(y/16)%2;
+    const base=stripe?210:195;
+    const n=(Math.random()-.5)*16;
+    const blade=Math.sin(x*.22)*4+Math.cos(y*.18)*3;
+    d[p]  =Math.min(255,Math.max(0,48 +n*.2+blade*.1));
+    d[p+1]=Math.min(255,Math.max(0,base+n   +blade  ));
+    d[p+2]=Math.min(255,Math.max(0,40 +n*.15+blade*.1));
+    d[p+3]=255;
+  }
+});grassTx.repeat.set(22,22);
+
+const stoneTx=mkT(128,128,(d)=>{
+  for(let i=0;i<d.length;i+=4){
+    const n=(Math.random()-.5)*50,c=Math.random()<.04?-22:0,crack=Math.random()<.006?-38:0;
+    d[i]=Math.min(255,Math.max(0,145+n+c+crack));
+    d[i+1]=Math.min(255,Math.max(0,140+n+c+crack));
+    d[i+2]=Math.min(255,Math.max(0,132+n*.8+c+crack));d[i+3]=255;
+  }
+});
+
+// Volcanic rock — dark grey-brown
+const volcTx=mkT(128,128,(d)=>{
+  for(let i=0;i<d.length;i+=4){
+    const n=(Math.random()-.5)*40,hot=Math.random()<.012?60:0;
+    d[i]=Math.min(255,Math.max(0,65+n+hot));
+    d[i+1]=Math.min(255,Math.max(0,55+n*.5+hot*.3));
+    d[i+2]=Math.min(255,Math.max(0,50+n*.4));d[i+3]=255;
+  }
+});
+
+const woodTx=mkT(128,64,(d,w,h)=>{
+  for(let y=0;y<h;y++){
+    const g=Math.sin(y*1.1)*9+Math.sin(y*.35)*5,k=Math.sin(y*.12)*Math.cos(y*.28)*5;
+    for(let x=0;x<w;x++){
+      const p=(y*w+x)*4,n=(Math.random()-.5)*12;
+      d[p]=Math.min(255,Math.max(0,135+g+n+k));d[p+1]=Math.min(255,Math.max(0,104+g+n+k*.7));
+      d[p+2]=Math.min(255,Math.max(0,68+g*.5+n*.4+k*.4));d[p+3]=255;
+    }
+  }
+});woodTx.repeat.set(6,2);
+
+const tileTx=mkT(128,128,(d,w)=>{
+  for(let i=0;i<d.length/4;i++){
+    const x=i%w,y=i/w|0,p=i*4;
+    const grout=(x%16<1||y%16<1)?-28:0;
+    const var2=Math.sin(Math.floor(x/16)*7.3+Math.floor(y/16)*3.7)*12;
+    const n=(Math.random()-.5)*14;
+    d[p]=Math.min(255,Math.max(0,192+grout+var2+n));
+    d[p+1]=Math.min(255,Math.max(0,182+grout+var2+n));
+    d[p+2]=Math.min(255,Math.max(0,170+grout+var2*.8+n));d[p+3]=255;
+  }
+});tileTx.repeat.set(4,4);
+
+// Castle stone — lighter grey
+const castleTx=mkT(128,128,(d,w)=>{
+  for(let i=0;i<d.length/4;i++){
+    const x=i%w,y=i/w|0,p=i*4;
+    const block=(Math.floor(x/18)+Math.floor(y/12)%2)*8;
+    const mortar=(x%18<1||y%12<1)?-20:0;
+    const n=(Math.random()-.5)*28;
+    d[p]=Math.min(255,Math.max(0,188+block+mortar+n));
+    d[p+1]=Math.min(255,Math.max(0,185+block+mortar+n));
+    d[p+2]=Math.min(255,Math.max(0,180+block*.8+mortar+n));d[p+3]=255;
+  }
+});
+
+// Water shimmer — richer turquoise highlight
+function mkW(br,bg,bb,sa){return mkT(256,256,(d,tw,th)=>{
+  for(let y=0;y<th;y++)for(let x=0;x<tw;x++){
+    const p=(y*tw+x)*4;
+    const rp=Math.sin(x*.1+y*.05)*16+Math.cos(x*.06-y*.09)*13+Math.sin(x*.18+y*.16)*7+Math.sin((x+y)*.08)*10;
+    const ca=Math.max(0,Math.sin(x*.13)*Math.cos(y*.1))*sa;
+    const sp=Math.max(0,Math.sin(x*.28+y*.22))*Math.max(0,Math.cos(x*.16-y*.2))*sa*.9;
+    const sun=Math.max(0,Math.sin(x*.07+y*.04))*sa*.5; // stronger sun sparkle
+    d[p]=Math.min(255,Math.max(0,br+rp+ca*.35+sp*.25+sun*.1));
+    d[p+1]=Math.min(255,Math.max(0,bg+rp+ca+sp+sun));
+    d[p+2]=Math.min(255,Math.max(0,bb+rp+ca*1.1+sp*1.1+sun*1.2));// boost blue channel
+    d[p+3]=255;
+  }
+});}
+
+const shTx=mkW(0,240,205,65);shTx.repeat.set(10,10); // brighter emerald shallow
+const mdTx=mkW(0,165,225,50);mdTx.repeat.set(14,14); // vivid azure mid
+const dpTx=mkW(0,85,200,35);dpTx.repeat.set(18,18);  // deep cobalt
+
+// River/waterfall texture
+const riverTx=mkW(0,200,230,58);riverTx.repeat.set(4,12);
+
+const thatchTx=mkT(128,128,(d,w,h)=>{
+  for(let y=0;y<h;y++){
+    const s=(y%4<2)?14:-7,st=Math.sin(y*.5)*4;
+    for(let x=0;x<w;x++){
+      const p=(y*w+x)*4,n=(Math.random()-.5)*22;
+      d[p]=Math.min(255,Math.max(0,158+s+n+st));d[p+1]=Math.min(255,Math.max(0,128+s+n+st*.7));
+      d[p+2]=Math.min(255,Math.max(0,60+s*.5+n*.4));d[p+3]=255;
+    }
+  }
+});
+
+// ══════════════════════════════════════════════════════
+// RENDERER + SCENE
+// ══════════════════════════════════════════════════════
+const scene=new THREE.Scene();
+// Super Mario Galaxy 2 — brilliant cerulean sky
+scene.background=new THREE.Color(0x55CCFF);
+// Bright sky-tinted haze, very light so distant land stays visible
+scene.fog=new THREE.FogExp2(0x88DDFF,0.00085);
+
+const cam=new THREE.PerspectiveCamera(72,innerWidth/innerHeight,.5,1000);
+cam.position.set(90,6,65);// Harbor dock start
+
+const R=new THREE.WebGLRenderer({antialias:!mob,powerPreference:'high-performance'});
+R.setSize(innerWidth,innerHeight);
+R.setPixelRatio(Math.min(devicePixelRatio,mob?1.5:2));
+R.shadowMap.enabled=!mob;
+if(R.shadowMap.enabled)R.shadowMap.type=THREE.PCFSoftShadowMap;
+R.outputColorSpace=THREE.SRGBColorSpace;
+R.toneMapping=THREE.ACESFilmicToneMapping;
+// Slightly higher exposure — SMG2 feels bright and overexposed-crisp
+R.toneMappingExposure=1.08;
+document.body.appendChild(R.domElement);
+
+// ══════════════════════════════════════════════════════
+// LIGHTING — Super Mario Galaxy 2 bright tropical day
+// ══════════════════════════════════════════════════════
+// Hemisphere: vivid sky-blue from above (SMG2 sky colour), warm peach-gold from below
+scene.add(new THREE.HemisphereLight(0x88DDFF,0xFFEEBB,0.9));
+
+// Primary sun — bright, slightly warm white, high noon angle
+const sunL=new THREE.DirectionalLight(0xFFFDF0,2.8);
+sunL.position.set(120,160,80);
+if(!mob){
+  sunL.castShadow=true;sunL.shadow.mapSize.set(2048,2048);
+  const sc=sunL.shadow.camera;sc.near=1;sc.far=600;
+  sc.left=-280;sc.right=280;sc.top=280;sc.bottom=-280;
+  sunL.shadow.bias=-0.0003;sunL.shadow.normalBias=0.018;
+}
+scene.add(sunL);
+
+// Bright sky bounce fill — cool blue from opposite side, very present
+const fillL=new THREE.DirectionalLight(0xCCEEFF,0.7);
+fillL.position.set(-80,80,-40);scene.add(fillL);
+
+// Warm second fill — subtle sand/ground bounce
+const groundBounce=new THREE.DirectionalLight(0xFFEEB8,0.22);
+groundBounce.position.set(0,-20,60);scene.add(groundBounce);
+
+const playerLight=new THREE.PointLight(0xFFEEDD,0.28,30);
+scene.add(playerLight);
+
+// Volcano glow light (warm orange from below)
+const volcGlow=new THREE.PointLight(0xFF4400,1.2,80);
+volcGlow.position.set(-20,20,-80);scene.add(volcGlow);
+
+// ══════════════════════════════════════════════════════
+// MATERIALS
+// ══════════════════════════════════════════════════════
+const sandM=new THREE.MeshStandardMaterial({map:sandTx,roughness:0.93,metalness:0.0,color:0xF0DCA8});
+// SMG2 grass — very vivid saturated green, almost lime-green bright
+const grassM=new THREE.MeshStandardMaterial({map:grassTx,roughness:0.85,metalness:0.0,color:0x6ED040});
+const stoneM=new THREE.MeshStandardMaterial({map:stoneTx,roughness:0.87,metalness:0.02,color:0xCCBFAA});
+const volcM=new THREE.MeshStandardMaterial({map:volcTx,roughness:0.92,metalness:0.04,color:0x554844});
+const woodM=new THREE.MeshStandardMaterial({map:woodTx,roughness:0.86,metalness:0.0});
+const tileM=new THREE.MeshStandardMaterial({map:tileTx,roughness:0.82,metalness:0.0});
+const castleM=new THREE.MeshStandardMaterial({map:castleTx,roughness:0.8,metalness:0.02,color:0xD8D0C8});
+const whiteM=new THREE.MeshStandardMaterial({color:0xF8F4EC,roughness:0.62,metalness:0.0});
+const creamM=new THREE.MeshStandardMaterial({color:0xF5E8C0,roughness:0.70,metalness:0.0});
+const redRoofM=new THREE.MeshStandardMaterial({color:0xCC3322,roughness:0.72,metalness:0.0});
+const blueRoofM=new THREE.MeshStandardMaterial({color:0x2255BB,roughness:0.68,metalness:0.0});
+const orangeM=new THREE.MeshStandardMaterial({color:0xFF8822,roughness:0.70,metalness:0.0});
+const darkWoodM=new THREE.MeshStandardMaterial({color:0x5E3818,roughness:0.88,metalness:0.0});
+const metalM=new THREE.MeshStandardMaterial({color:0x889999,roughness:0.35,metalness:0.65});
+// Red Iron Bridge metal — dark iron red
+const ironM=new THREE.MeshStandardMaterial({color:0x882222,roughness:0.55,metalness:0.7});
+const rnM=new THREE.MeshStandardMaterial({color:0xFFD700,roughness:0.08,metalness:0.96,emissive:0xDDA000,emissiveIntensity:0.42});
+const leafM=new THREE.MeshStandardMaterial({color:0x44D82E,roughness:0.84,metalness:0.0,side:THREE.DoubleSide});
+const leafDkM=new THREE.MeshStandardMaterial({color:0x30A820,roughness:0.87,metalness:0.0,side:THREE.DoubleSide});
+const trunkM=new THREE.MeshStandardMaterial({color:0x7A5530,roughness:0.90,metalness:0.0});
+const palmTrunkM=new THREE.MeshStandardMaterial({color:0x9B7845,roughness:0.88,metalness:0.0});
+const palmLeafM=new THREE.MeshStandardMaterial({color:0x44BB22,roughness:0.85,metalness:0.0,side:THREE.DoubleSide});
+const lavaM=new THREE.MeshStandardMaterial({color:0xFF2200,roughness:0.4,metalness:0.0,emissive:0xFF4400,emissiveIntensity:0.8});
+const waterRiverM=new THREE.MeshStandardMaterial({map:riverTx,transparent:true,opacity:0.82,roughness:0.05,metalness:0.2,color:0x22DDFF});
+const foMat=new THREE.MeshStandardMaterial({color:0xDDFFFF,roughness:0.7,metalness:0.0,transparent:true,opacity:.42});
+const shMat=new THREE.MeshStandardMaterial({map:shTx,transparent:true,opacity:0.82,roughness:0.04,metalness:0.18,color:0x00FFD8});
+const mdMat=new THREE.MeshStandardMaterial({map:mdTx,transparent:true,opacity:0.88,roughness:0.08,metalness:0.16,color:0x00AAEE});
+const dpMat=new THREE.MeshStandardMaterial({map:dpTx,transparent:true,opacity:0.93,roughness:0.14,metalness:0.14,color:0x0066BB});
+const thatchM=new THREE.MeshStandardMaterial({map:thatchTx,roughness:0.95,metalness:0.0});
+
+// ─── CUSTOM ANIMATED WATER SHADER — vertex waves + sun sparkle ───
+// Used for the main ocean surface replacing the flat planes
+const waterShaderMat=new THREE.ShaderMaterial({
+  uniforms:{
+    uTime:{value:0},
+    uDeep:{value:new THREE.Color(0x0055BB)},
+    uShallow:{value:new THREE.Color(0x00FFD8)},
+    uSunDir:{value:new THREE.Vector3(.55,.82,.15).normalize()},
+    uOpacity:{value:0.88}
+  },
+  vertexShader:`
+    uniform float uTime;
+    varying vec2 vUv;
+    varying float vWave;
+    varying vec3 vNormal;
+    varying vec3 vWorldPos;
+    void main(){
+      vUv=uv;
+      vec3 pos=position;
+      // Multi-frequency wave displacement
+      float w1=sin(pos.x*.08+uTime*1.2)*1.8;
+      float w2=cos(pos.z*.06+uTime*.9)*1.4;
+      float w3=sin((pos.x+pos.z)*.05+uTime*1.5)*0.9;
+      float w4=cos(pos.x*.14-pos.z*.1+uTime*2.0)*0.5;
+      pos.y+=w1+w2+w3+w4;
+      vWave=(w1+w2+w3+w4+5.6)/11.2; // 0-1 normalised
+      // Approximate normal from wave gradient
+      float dx=cos(pos.x*.08+uTime*1.2)*.08*1.8+sin(pos.z*.06+uTime*.9)*.0;
+      float dz=cos(pos.z*.06+uTime*.9)*.06*1.4+cos((pos.x+pos.z)*.05+uTime*1.5)*.05*.9;
+      vNormal=normalize(vec3(-dx,1.0,-dz));
+      vWorldPos=(modelMatrix*vec4(pos,1.0)).xyz;
+      gl_Position=projectionMatrix*modelViewMatrix*vec4(pos,1.0);
+    }
+  `,
+  fragmentShader:`
+    uniform vec3 uDeep;
+    uniform vec3 uShallow;
+    uniform vec3 uSunDir;
+    uniform float uOpacity;
+    varying vec2 vUv;
+    varying float vWave;
+    varying vec3 vNormal;
+    varying vec3 vWorldPos;
+    void main(){
+      // Depth-based colour blend
+      vec3 col=mix(uDeep,uShallow,vWave*.8);
+      // Specular sun sparkle
+      vec3 viewDir=normalize(cameraPosition-vWorldPos);
+      vec3 halfV=normalize(uSunDir+viewDir);
+      float spec=pow(max(dot(vNormal,halfV),0.0),80.0);
+      // Foam crests on wave peaks
+      float foam=smoothstep(.78,.92,vWave)*.55;
+      col+=vec3(spec*.9,spec*.95,spec);
+      col+=vec3(foam);
+      // Subtle grid sparkle
+      float spk=max(0.0,sin(vUv.x*80.0+vUv.y*60.0))*.04;
+      col+=vec3(spk*.3,spk*.5,spk*.8);
+      gl_FragColor=vec4(col,uOpacity);
+    }
+  `,
+  transparent:true,
+  side:THREE.FrontSide
+});
+
+// ══════════════════════════════════════════════════════
+// SKY DOME — Super Mario Galaxy 2 brilliant cerulean
+// Top: deep vivid blue (0x1166EE)
+// Mid-upper: bright sky blue (0x55CCFF)  
+// Mid-lower: light sky (0x99DDFF)
+// Horizon: near-white pale blue (0xCCEEFF) — SMG2's signature bright horizon
+// ══════════════════════════════════════════════════════
+const skyG=new THREE.SphereGeometry(600,32,22);
+const skC=new Float32Array(skyG.attributes.position.count*3);
+const skP=skyG.attributes.position;
+for(let i=0;i<skP.count;i++){
+  const y=skP.getY(i)/600;let r,g,b;
+  // SMG2 palette: vivid deep blue at zenith fading to near-white bright sky at horizon
+  if(y>.75){r=.06;g=.38;b=.98;}                                      // zenith: 0x0F60FA vivid
+  else if(y>.5){const t=(y-.5)/.25;r=.06*t+.18*(1-t);g=.38*t+.64*(1-t);b=.98*t+1.0*(1-t);}  // upper: to bright blue
+  else if(y>.25){const t=(y-.25)/.25;r=.18*t+.38*(1-t);g=.64*t+.82*(1-t);b=1.0*(t+(1-t));}  // mid: bright sky
+  else if(y>.05){const t=(y-.05)/.2;r=.38*t+.72*(1-t);g=.82*t+.92*(1-t);b=1.0;}             // lower: near horizon
+  else if(y>-.08){const t=(y+.08)/.13;r=.72*t+.88*(1-t);g=.92*t+.96*(1-t);b=1.0;}           // horizon: nearly white-blue
+  else{r=.88;g=.96;b=1.0;}                                             // below horizon: white-blue
+  skC[i*3]=r;skC[i*3+1]=g;skC[i*3+2]=b;
+}
+skyG.setAttribute('color',new THREE.BufferAttribute(skC,3));
+scene.add(new THREE.Mesh(skyG,new THREE.MeshBasicMaterial({vertexColors:true,side:THREE.BackSide})));
+
+// ─── SUN — brighter, whiter, larger SMG2 sun ───
+const sunD=new THREE.Mesh(new THREE.CircleGeometry(14,32),new THREE.MeshBasicMaterial({color:0xFFFFFF}));
+sunD.position.set(115,280,-220);sunD.lookAt(0,0,0);scene.add(sunD);
+// Bright inner halo
+const sunH1=new THREE.Mesh(new THREE.CircleGeometry(24,32),new THREE.MeshBasicMaterial({color:0xFFFFFF,transparent:true,opacity:.55}));
+sunH1.position.set(115,280,-218);sunH1.lookAt(0,0,0);scene.add(sunH1);
+// Outer soft glow layers
+[38,58,85,120].forEach((r,i)=>{
+  const gl=new THREE.Mesh(new THREE.CircleGeometry(r,32),new THREE.MeshBasicMaterial({color:0xEEF8FF,transparent:true,opacity:[.22,.10,.04,.015][i]}));
+  gl.position.set(115,280,-216+i);gl.lookAt(0,0,0);scene.add(gl);
+});
+
+// ─── SMG2-STYLE BIG PUFFY CLOUDS ───
+// Custom cloud builder: multiple large flat-bottomed fluffy puffs
+// Light from above = bright white tops, very pale blue-grey undersides
+const clouds=[];
+const cloudTopM=new THREE.MeshBasicMaterial({color:0xFFFFFF});
+const cloudMidM=new THREE.MeshBasicMaterial({color:0xF0F8FF,transparent:true,opacity:.97});
+const cloudShadM=new THREE.MeshBasicMaterial({color:0xCCE8F8,transparent:true,opacity:.82});
+const cloudDarkM=new THREE.MeshBasicMaterial({color:0xB8D8EE,transparent:true,opacity:.72});
+
+function mkCloud(x,y,z,s){
+  const g=new THREE.Group();
+  const numPuffs=5+Math.floor(Math.random()*5); // 5-9 puffs per cloud
+  
+  // Flat base bottom — SMG2 clouds have a definite flat bottom
+  const baseW=(numPuffs*.7+.5)*s*1.1;
+  const baseFlat=new THREE.Mesh(new THREE.CylinderGeometry(baseW*.5,baseW*.5,.18*s,16),cloudShadM);
+  baseFlat.position.y=-s*.08;g.add(baseFlat);
+  // Underside dark disk
+  const under=new THREE.Mesh(new THREE.CircleGeometry(baseW*.48,16),cloudDarkM);
+  under.rotation.x=Math.PI/2;under.position.y=-s*.16;g.add(under);
+
+  // Main puffs — large rounded tops
+  for(let i=0;i<numPuffs;i++){
+    const t=i/(numPuffs-1);
+    // Arch shape: bigger puffs in centre, smaller on edges
+    const edgeFactor=1-Math.abs(t-.5)*1.6;
+    const puffR=(0.55+edgeFactor*0.65+Math.random()*.25)*s;
+    const px=(i-numPuffs/2+.5)*s*.88+(Math.random()-.5)*s*.18;
+    const py=puffR*.55+Math.random()*s*.15;
+    const pz=(Math.random()-.5)*s*.35;
+
+    // Top sphere (bright white)
+    const top=new THREE.Mesh(new THREE.SphereGeometry(puffR,10,8),cloudTopM);
+    top.position.set(px,py,pz);top.scale.y=.78;g.add(top);
+
+    // Mid layer (slightly tinted)
+    if(Math.random()>.35){
+      const mid=new THREE.Mesh(new THREE.SphereGeometry(puffR*.72,8,6),cloudMidM);
+      mid.position.set(px+s*.12,py-puffR*.22,pz+s*.08);mid.scale.y=.65;g.add(mid);
+    }
+    // Extra small top bubble
+    if(Math.random()>.5){
+      const bub=new THREE.Mesh(new THREE.SphereGeometry(puffR*.42,7,5),cloudTopM);
+      bub.position.set(px+(Math.random()-.5)*puffR*.8,py+puffR*.55,pz+(Math.random()-.5)*puffR*.4);
+      bub.scale.y=.85;g.add(bub);
+    }
+  }
+  g.position.set(x,y,z);scene.add(g);clouds.push(g);
+}
+
+// Spawn lots of big clouds at varying altitudes — SMG2 has layers of clouds
+// Low-altitude big puffy clouds (visible close)
+for(let i=0;i<18;i++)mkCloud((Math.random()-.5)*1000,52+Math.random()*22,-200+(Math.random()-.5)*600,8+Math.random()*10);
+// Mid-altitude medium clouds
+for(let i=0;i<14;i++)mkCloud((Math.random()-.5)*1100,82+Math.random()*28,-200+(Math.random()-.5)*700,5+Math.random()*7);
+// High wispy smaller clouds
+for(let i=0;i<10;i++)mkCloud((Math.random()-.5)*1200,115+Math.random()*35,-200+(Math.random()-.5)*800,3+Math.random()*4);
+
+// ══════════════════════════════════════════════════════
+// OCEAN
+// ══════════════════════════════════════════════════════
+const ofl=new THREE.Mesh(new THREE.PlaneGeometry(2000,2000),new THREE.MeshStandardMaterial({color:0x008866,roughness:0.96,metalness:0.0}));
+ofl.rotation.x=-Math.PI/2;ofl.position.set(0,-7,0);scene.add(ofl);
+// ─── ANIMATED SHADER OCEAN — replaces flat planes ───
+// High-segment plane so vertex shader has geometry to deform
+const oceanGeo=new THREE.PlaneGeometry(2200,2200,180,180);
+oceanGeo.rotateX(-Math.PI/2);
+const oceanMesh=new THREE.Mesh(oceanGeo,waterShaderMat);
+oceanMesh.position.set(0,-.3,0);
+scene.add(oceanMesh);
+
+// Shallow tint overlay (static, just colour grade near shore)
+const shoreOverlay=new THREE.Mesh(new THREE.PlaneGeometry(600,600),
+  new THREE.MeshStandardMaterial({color:0x00FFD8,transparent:true,opacity:0.22,roughness:0.04,metalness:0.1,depthWrite:false}));
+shoreOverlay.rotation.x=-Math.PI/2;shoreOverlay.position.set(0,.05,40);scene.add(shoreOverlay);
+
+// ══════════════════════════════════════════════════════
+// ISLAND TERRAIN — faithful to the Wuhu Island map
+// Layout (matching image):
+//   South-East: Sweet Beach (±x=120-180, z=180-240)
+//   South: Seafront promenade (z=140-200)
+//   Center-South: Wuhu Town (x=0-60, z=80-160)
+//   East: Harbor + Cocoba Hotel (x=90-160, z=0-90)
+//   Center: Maka Wuhu Volcano (x=-20, z=-60 to -120)
+//   North-NW: Summerstone Castle (x=-60, z=-130)
+//   West: Pirate's Eye peninsula (x=-140, z=20)
+//   SW: The Candle sea stack (x=-110, z=140)
+//   Mid-W: Forest/hills
+// ══════════════════════════════════════════════════════
+function buildIsland(){
+  // ─── MAIN BODY — large grass island base ───
+  const main=new THREE.Mesh(new THREE.CylinderGeometry(195,210,9,36),grassM);
+  main.position.set(0,-.5,30);main.receiveShadow=true;scene.add(main);
+  platforms.push({pos:new THREE.Vector3(0,4,30),w:390,d:420,h:4});
+
+  // ─── BEACH AREA (SW) — Sugarsand, Starry, Sweet Beaches ───
+  // Sugarsand Beach — west side, gentle curve
+  const sugarsand=new THREE.Mesh(new THREE.CylinderGeometry(55,65,2.5,16),sandM);
+  sugarsand.position.set(-80,2.5,210);sugarsand.scale.set(1.4,.4,1);scene.add(sugarsand);
+  // Starry Beach — center south
+  const starry=new THREE.Mesh(new THREE.CylinderGeometry(70,80,2,18),sandM);
+  starry.position.set(20,2.8,225);starry.scale.set(1.5,.4,1);scene.add(starry);
+  // Sweet Beach — SE peninsula
+  const sweetBeachBase=new THREE.Mesh(new THREE.CylinderGeometry(65,75,5,18),sandM);
+  sweetBeachBase.position.set(140,1.5,200);sweetBeachBase.receiveShadow=true;scene.add(sweetBeachBase);
+  platforms.push({pos:new THREE.Vector3(140,3.5,200),w:130,d:120,h:3.5});
+  const swFlat=new THREE.Mesh(new THREE.PlaneGeometry(130,100),sandM);
+  swFlat.rotation.x=-Math.PI/2;swFlat.position.set(140,3.9,200);scene.add(swFlat);
+
+  // ─── CAMEL ROCK — large rocky formation near Sweet Beach ───
+  // Two humps = classic camel silhouette
+  const camelBase=new THREE.Mesh(new THREE.BoxGeometry(22,6,10),volcM);
+  camelBase.position.set(185,4,175);camelBase.castShadow=true;scene.add(camelBase);
+  const camelHump1=new THREE.Mesh(new THREE.SphereGeometry(7,10,7),volcM);
+  camelHump1.position.set(181,11,175);camelHump1.scale.set(1,.85,1);camelHump1.castShadow=true;scene.add(camelHump1);
+  const camelHump2=new THREE.Mesh(new THREE.SphereGeometry(5.5,10,7),volcM);
+  camelHump2.position.set(192,9.5,175);camelHump2.scale.set(.85,.8,1);camelHump2.castShadow=true;scene.add(camelHump2);
+  // Neck connecting humps
+  const camelNeck=new THREE.Mesh(new THREE.CylinderGeometry(3.5,4.5,5,8),volcM);
+  camelNeck.position.set(186.5,8,175);scene.add(camelNeck);
+  platforms.push({pos:new THREE.Vector3(185,11,175),w:22,d:12,h:11});
+
+  // ─── FRONTAL MOUNTAIN BASE AREA — gently hilly, gradual ascent ───
+  // This is the region at the foot of Maka Wuhu, below the falls
+  // Multiple overlapping hills for smooth gradient feel
+  const hill1=new THREE.Mesh(new THREE.CylinderGeometry(65,80,10,18),grassM);
+  hill1.position.set(10,4,30);hill1.castShadow=true;scene.add(hill1);
+  platforms.push({pos:new THREE.Vector3(10,9,30),w:120,d:120,h:9});
+
+  const hill2=new THREE.Mesh(new THREE.CylinderGeometry(50,65,14,16),grassM);
+  hill2.position.set(-5,6,0);hill2.castShadow=true;scene.add(hill2);
+  platforms.push({pos:new THREE.Vector3(-5,13,0),w:95,d:95,h:13});
+
+  const hill3=new THREE.Mesh(new THREE.CylinderGeometry(40,55,16,14),grassM);
+  hill3.position.set(-12,9,-25);hill3.castShadow=true;scene.add(hill3);
+  platforms.push({pos:new THREE.Vector3(-12,17,-25),w:75,d:75,h:17});
+
+  const hill4=new THREE.Mesh(new THREE.CylinderGeometry(32,48,18,14),grassM);
+  hill4.position.set(-15,12,-45);hill4.castShadow=true;scene.add(hill4);
+  platforms.push({pos:new THREE.Vector3(-15,21,-45),w:60,d:60,h:21});
+
+  // ─── MAKA WUHU VOLCANO — north center, gradual tiered ascent ───
+  // Tier 1 — broad grassy volcanic base (Mountain Area starts here)
+  const volcBase=new THREE.Mesh(new THREE.CylinderGeometry(90,112,20,22),grassM);
+  volcBase.position.set(-14,8,-72);volcBase.castShadow=true;volcBase.receiveShadow=true;scene.add(volcBase);
+  platforms.push({pos:new THREE.Vector3(-14,18,-72),w:175,d:175,h:18});
+
+  // Tier 2 — rocky transition, dark volcanic rock starts
+  const volcTier2=new THREE.Mesh(new THREE.CylinderGeometry(68,88,18,20),volcM);
+  volcTier2.position.set(-14,22,-74);volcTier2.castShadow=true;scene.add(volcTier2);
+  platforms.push({pos:new THREE.Vector3(-14,31,-74),w:130,d:130,h:31});
+
+  // Tier 3 — steeper mid-section
+  const volcMid=new THREE.Mesh(new THREE.CylinderGeometry(50,66,22,18),volcM);
+  volcMid.position.set(-13,35,-78);volcMid.castShadow=true;scene.add(volcMid);
+  platforms.push({pos:new THREE.Vector3(-13,46,-78),w:95,d:95,h:46});
+
+  // Tier 4 — upper steep cone
+  const volcUpper=new THREE.Mesh(new THREE.CylinderGeometry(30,48,24,16),volcM);
+  volcUpper.position.set(-12,51,-80);volcUpper.castShadow=true;scene.add(volcUpper);
+  platforms.push({pos:new THREE.Vector3(-12,63,-80),w:55,d:55,h:63});
+
+  // Tier 5 — summit narrow peak
+  const volcSummit=new THREE.Mesh(new THREE.ConeGeometry(30,26,16),volcM);
+  volcSummit.position.set(-12,72,-81);volcSummit.castShadow=true;scene.add(volcSummit);
+
+  // Crater rim — wide enough to walk around
+  const rim=new THREE.Mesh(new THREE.TorusGeometry(16,4,10,28),volcM);
+  rim.position.set(-12,84,-81);rim.rotation.x=Math.PI/2;rim.castShadow=true;scene.add(rim);
+  // Crater walkway inside rim
+  const craterRing=new THREE.Mesh(new THREE.CylinderGeometry(14,14,.8,24,1,true),volcM);
+  craterRing.position.set(-12,83,-81);scene.add(craterRing);
+  platforms.push({pos:new THREE.Vector3(-12,85,-81),w:36,d:36,h:85});
+
+  // ─── LAVA INTERIOR — visible bubbling lava pool ───
+  // Deep lava pool — glowing animated texture
+  const lavaDepth=new THREE.Mesh(new THREE.CylinderGeometry(12,14,8,20),
+    new THREE.MeshStandardMaterial({color:0x220000,roughness:0.9,metalness:0.0}));
+  lavaDepth.position.set(-12,77,-81);scene.add(lavaDepth);
+  // Lava surface
+  const lava=new THREE.Mesh(new THREE.CircleGeometry(12.5,24),lavaM);
+  lava.rotation.x=-Math.PI/2;lava.position.set(-12,82.5,-81);scene.add(lava);
+  // Lava inner glow rings
+  const lavaRing1=new THREE.Mesh(new THREE.TorusGeometry(7,1.5,6,20),
+    new THREE.MeshStandardMaterial({color:0xFF6600,emissive:0xFF4400,emissiveIntensity:1.2,roughness:0.3}));
+  lavaRing1.rotation.x=Math.PI/2;lavaRing1.position.set(-12,83,-81);scene.add(lavaRing1);
+  // Lava bubble spots
+  for(let i=0;i<6;i++){
+    const a=(i/6)*Math.PI*2;
+    const bubble=new THREE.Mesh(new THREE.SphereGeometry(.8+Math.random()*.6,7,5),
+      new THREE.MeshStandardMaterial({color:0xFF3300,emissive:0xFF2200,emissiveIntensity:0.9,roughness:0.2}));
+    bubble.position.set(-12+Math.cos(a)*6,83.5,-81+Math.sin(a)*6);scene.add(bubble);
+  }
+  // Main lava lights
+  const lavaGl=new THREE.PointLight(0xFF3300,3.5,80);lavaGl.position.set(-12,90,-81);scene.add(lavaGl);
+  const lavaGl2=new THREE.PointLight(0xFF6600,2,40);lavaGl2.position.set(-12,83,-81);scene.add(lavaGl2);
+  // Lava smoke particles (rising dark spheres)
+  for(let i=0;i<8;i++){
+    const smoke=new THREE.Mesh(new THREE.SphereGeometry(.6+Math.random()*.8,6,5),
+      new THREE.MeshStandardMaterial({color:0x221100,transparent:true,opacity:.35+Math.random()*.3,roughness:1}));
+    smoke.position.set(-12+(Math.random()-.5)*10,86+Math.random()*20,-81+(Math.random()-.5)*10);
+    smoke.scale.set(1,.5,1);scene.add(smoke);
+  }
+
+  // ─── SUMMERSTONE FALLS AREA — plateau between volcano and castle ───
+  const stoneHL=new THREE.Mesh(new THREE.CylinderGeometry(45,62,18,16),grassM);
+  stoneHL.position.set(-35,8,-30);stoneHL.castShadow=true;scene.add(stoneHL);
+  platforms.push({pos:new THREE.Vector3(-35,16,-30),w:85,d:85,h:16});
+
+  // ─── DUCKLING LAKE — in the mountain area near Summerstone Castle ───
+  // Elevated lake sitting on the highland, between castle and volcano base
+  const duckLakeFloor=new THREE.Mesh(new THREE.CylinderGeometry(18,18,1,20),
+    new THREE.MeshStandardMaterial({color:0x228866,roughness:0.95}));
+  duckLakeFloor.position.set(-50,20,-100);scene.add(duckLakeFloor);
+  const duckLakeWater=new THREE.Mesh(new THREE.CylinderGeometry(17,17,.5,20),
+    new THREE.MeshStandardMaterial({color:0x55CCFF,transparent:true,opacity:0.88,roughness:0.02,metalness:0.2}));
+  duckLakeWater.position.set(-50,21,-100);scene.add(duckLakeWater);
+  // Lake bank (grassy rim)
+  const lakeBank=new THREE.Mesh(new THREE.TorusGeometry(18.5,4,8,20),grassM);
+  lakeBank.rotation.x=Math.PI/2;lakeBank.position.set(-50,20.5,-100);scene.add(lakeBank);
+  platforms.push({pos:new THREE.Vector3(-50,21.5,-100),w:50,d:50,h:21.5});
+  // Duck silhouettes on water
+  const duckBodyM=new THREE.MeshStandardMaterial({color:0xFFFFAA,roughness:0.8});
+  const duckHeadM=new THREE.MeshStandardMaterial({color:0x44AA22,roughness:0.8});
+  [[0,0],[8,-5],[-6,4],[3,8]].forEach(([dx,dz])=>{
+    const body=new THREE.Mesh(new THREE.SphereGeometry(.55,7,5),duckBodyM);
+    body.position.set(-50+dx,21.6,-100+dz);body.scale.set(1.3,.6,1.8);scene.add(body);
+    const head=new THREE.Mesh(new THREE.SphereGeometry(.3,6,5),duckHeadM);
+    head.position.set(-50+dx+.5,21.9,-100+dz-.6);scene.add(head);
+    const bill=new THREE.Mesh(new THREE.ConeGeometry(.12,.3,4),new THREE.MeshStandardMaterial({color:0xFFAA00,roughness:0.7}));
+    bill.rotation.z=Math.PI/2;bill.position.set(-50+dx+.85,21.85,-100+dz-.6);scene.add(bill);
+  });
+  // Lake reflection light
+  const lakeGl=new THREE.PointLight(0x88DDFF,.9,45);lakeGl.position.set(-50,24,-100);scene.add(lakeGl);
+  ZONES.push({name:'Duckling Lake',cx:-50,cz:-100,r:30});
+
+  // ─── CASTLE HIGHLAND — northwest ───
+  const castleHL=new THREE.Mesh(new THREE.CylinderGeometry(40,55,20,14),grassM);
+  castleHL.position.set(-65,12,-115);castleHL.castShadow=true;scene.add(castleHL);
+  platforms.push({pos:new THREE.Vector3(-65,21,-115),w:75,d:75,h:21});
+
+  // ─── EAST PENINSULA — harbor + Cocoba Hotel ───
+  const eastPen=new THREE.Mesh(new THREE.CylinderGeometry(60,70,7,18),grassM);
+  eastPen.position.set(130,0.5,60);eastPen.receiveShadow=true;scene.add(eastPen);
+  platforms.push({pos:new THREE.Vector3(130,3.5,60),w:120,d:120,h:3.5});
+
+  // ─── PIRATE'S EYE — west peninsula ───
+  const pirPen=new THREE.Mesh(new THREE.CylinderGeometry(38,48,10,14),grassM);
+  pirPen.position.set(-148,1,20);pirPen.castShadow=true;scene.add(pirPen);
+  platforms.push({pos:new THREE.Vector3(-148,5,20),w:76,d:76,h:5});
+  const pirBase=new THREE.Mesh(new THREE.CylinderGeometry(12,18,16,10),volcM);
+  pirBase.position.set(-162,3,25);pirBase.castShadow=true;scene.add(pirBase);
+  const pirArch=new THREE.Mesh(new THREE.TorusGeometry(8,4,6,14,Math.PI),volcM);
+  pirArch.position.set(-162,18,25);pirArch.rotation.y=Math.PI/2;scene.add(pirArch);
+
+  // ─── THE CANDLE — tall sea stack with lighthouse on top ───
+  const candle=new THREE.Mesh(new THREE.CylinderGeometry(5,10,40,10),volcM);
+  candle.position.set(-118,0,148);candle.castShadow=true;scene.add(candle);
+  const candleTop=new THREE.Mesh(new THREE.CylinderGeometry(8,5,6,10),volcM);
+  candleTop.position.set(-118,42,148);scene.add(candleTop);
+  const candleCap=new THREE.Mesh(new THREE.CylinderGeometry(7,7,1.5,10),grassM);
+  candleCap.position.set(-118,46,148);scene.add(candleCap);
+  platforms.push({pos:new THREE.Vector3(-118,47,148),w:14,d:14,h:47});
+  // Lighthouse on The Candle
+  (function(){
+    const g=new THREE.Group();
+    const tw=new THREE.Mesh(new THREE.CylinderGeometry(1.8,2.2,10,9),whiteM);tw.position.y=5;g.add(tw);
+    for(let i=0;i<2;i++){const b=new THREE.Mesh(new THREE.CylinderGeometry(1.82,1.82,1,9),redRoofM);b.position.y=2+i*4;g.add(b);}
+    const lamp=new THREE.Mesh(new THREE.CylinderGeometry(1.6,1.8,1.5,9),metalM);lamp.position.y=10.8;g.add(lamp);
+    const lgt=new THREE.Mesh(new THREE.SphereGeometry(.7,7,5),new THREE.MeshBasicMaterial({color:0xFFFF88}));lgt.position.y=12;g.add(lgt);
+    const lhL=new THREE.PointLight(0xFFFF88,3,120);lhL.position.y=12;g.add(lhL);
+    const cap2=new THREE.Mesh(new THREE.ConeGeometry(1.8,2,9),redRoofM);cap2.position.y=13;g.add(cap2);
+    g.position.set(-118,47,148);scene.add(g);
+  })();
+
+  // ─── PRIVATE ISLAND — far west ───
+  const privIsl=new THREE.Mesh(new THREE.CylinderGeometry(30,35,5,14),grassM);
+  privIsl.position.set(-230,0,60);privIsl.receiveShadow=true;scene.add(privIsl);
+  platforms.push({pos:new THREE.Vector3(-230,2.5,60),w:60,d:60,h:2.5});
+  const privSand=new THREE.Mesh(new THREE.CylinderGeometry(28,30,2,14),sandM);
+  privSand.position.set(-230,2,60);scene.add(privSand);
+
+  // Small islet rocks
+  [[-190,180,8],[200,130,6],[220,-20,5],[-180,-50,7],[170,-80,6]].forEach(([x,z,r])=>{
+    const rock=new THREE.Mesh(new THREE.CylinderGeometry(r*.6,r,4,10),volcM);
+    rock.position.set(x,0,z);scene.add(rock);
+  });
+}
+buildIsland();
+function buildSweetBeach(){
+  // Wet shore strip
+  const wet=new THREE.MeshStandardMaterial({map:sandTx,roughness:0.58,metalness:0.0,color:0xC8B478});
+  const ws=new THREE.Mesh(new THREE.PlaneGeometry(140,25),wet);ws.rotation.x=-Math.PI/2;ws.position.set(140,3.95,235);scene.add(ws);
+
+  // Foam lines
+  for(let i=0;i<4;i++){const f=new THREE.Mesh(new THREE.PlaneGeometry(200,2.5),foMat);f.rotation.x=-Math.PI/2;f.position.set(100,4.0,250-i*6);scene.add(f);}
+
+  // Colorful umbrellas
+  const ucols=[0xFF4444,0x4488FF,0xFF8800,0x44CC44,0xFF44AA,0xFFDD00];
+  for(let i=0;i<22;i++){
+    const g=new THREE.Group(),col=ucols[i%6];
+    const pole=new THREE.Mesh(new THREE.CylinderGeometry(.06,.06,3,5),metalM);pole.position.y=1.5;g.add(pole);
+    const top=new THREE.Mesh(new THREE.ConeGeometry(2.4,.55,8),new THREE.MeshStandardMaterial({color:col,roughness:0.7,side:THREE.DoubleSide}));top.position.y=3.2;g.add(top);
+    const brim=new THREE.Mesh(new THREE.CylinderGeometry(2.6,.1,.18,8),new THREE.MeshStandardMaterial({color:col,roughness:0.7}));brim.position.y=2.9;g.add(brim);
+    g.position.set(80+Math.random()*130,3.8,160+Math.random()*75);scene.add(g);
+  }
+  // Towels
+  const tcols=[0xFF6666,0x6688FF,0xFFAA44,0xFF88CC,0x88FFAA];
+  for(let i=0;i<28;i++){
+    const tw=new THREE.Mesh(new THREE.PlaneGeometry(2.2+Math.random()*.8,1.2),new THREE.MeshStandardMaterial({color:tcols[i%5],roughness:0.9}));
+    tw.rotation.x=-Math.PI/2;tw.rotation.z=Math.random()*Math.PI;
+    tw.position.set(70+Math.random()*150,4.02,162+Math.random()*65);scene.add(tw);
+  }
+  // Beach volleyball net
+  (function(){
+    const g=new THREE.Group();
+    const p1=new THREE.Mesh(new THREE.CylinderGeometry(.1,.1,3.5,5),darkWoodM);p1.position.set(-4,1.75,0);g.add(p1);
+    const p2=p1.clone();p2.position.set(4,1.75,0);g.add(p2);
+    const net=new THREE.Mesh(new THREE.BoxGeometry(8,.08,1.5),new THREE.MeshStandardMaterial({color:0xFFFFCC,roughness:0.8,transparent:true,opacity:0.8}));
+    net.position.set(0,3.4,0);g.add(net);
+    g.position.set(155,3.8,188);scene.add(g);
+  })();
+}
+buildSweetBeach();
+
+// ══════════════════════════════════════════════════════
+// WUHU TOWN — south-center, main settlement
+// ══════════════════════════════════════════════════════
+function mkBuilding(x,z,w,d,h,wallM,roofM,ry){
+  const g=new THREE.Group();
+  const walls=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),wallM);
+  walls.position.y=h/2;walls.castShadow=true;walls.receiveShadow=true;g.add(walls);
+  const roof=new THREE.Mesh(new THREE.ConeGeometry(Math.max(w,d)*.72,h*.42,4),roofM);
+  roof.position.y=h+h*.18;roof.rotation.y=Math.PI/4;roof.castShadow=true;g.add(roof);
+  const door=new THREE.Mesh(new THREE.BoxGeometry(w*.22,h*.38,.16),darkWoodM);door.position.set(0,h*.19,d/2+.09);g.add(door);
+  const winM2=new THREE.MeshStandardMaterial({color:0x88CCFF,roughness:0.08,metalness:0.05,transparent:true,opacity:0.72});
+  for(const wx of[-w*.26,w*.26]){const win=new THREE.Mesh(new THREE.BoxGeometry(w*.18,h*.22,.14),winM2);win.position.set(wx,h*.56,d/2+.09);g.add(win);}
+  g.position.set(x,4,z);g.rotation.y=ry||0;scene.add(g);
+  platforms.push({pos:new THREE.Vector3(x,4+h,z),w:w+1,d:d+1,h:4+h});
+}
+
+function buildWuhuTown(){
+  // Town square — cobblestone
+  const sq=new THREE.Mesh(new THREE.BoxGeometry(110,0.22,90),tileM);
+  sq.position.set(30,4.04,120);sq.receiveShadow=true;scene.add(sq);
+
+  // Central fountain
+  (function(){
+    const g=new THREE.Group();
+    const base=new THREE.Mesh(new THREE.CylinderGeometry(5,5.5,1.2,14),stoneM);base.position.y=.6;g.add(base);
+    const basin=new THREE.Mesh(new THREE.CylinderGeometry(4.2,5,1.4,14),stoneM);basin.position.y=1.8;g.add(basin);
+    const col=new THREE.Mesh(new THREE.CylinderGeometry(.22,.32,2.4,8),stoneM);col.position.y=3.2;g.add(col);
+    const top=new THREE.Mesh(new THREE.SphereGeometry(.55,8,6),stoneM);top.position.y=4.5;g.add(top);
+    // Water basin fill
+    const wf=new THREE.Mesh(new THREE.CylinderGeometry(3.8,.05,1.2,14,1,true),new THREE.MeshStandardMaterial({color:0x66DDFF,transparent:true,opacity:.55,roughness:0.04,metalness:0.2,side:THREE.BackSide}));
+    wf.position.y=2.2;g.add(wf);
+    g.position.set(30,4,118);scene.add(g);
+  })();
+
+  // Town buildings — dozens, faithful Wuhu style
+  mkBuilding(-10,100,14,12,9,whiteM,redRoofM,0);
+  mkBuilding(10,108,12,10,8,creamM,blueRoofM,.08);
+  mkBuilding(32,112,15,13,10,whiteM,orangeM,0);
+  mkBuilding(52,106,12,11,8,creamM,redRoofM,-.06);
+  mkBuilding(70,100,13,12,9,whiteM,blueRoofM,.04);
+  mkBuilding(-25,115,11,10,8,creamM,orangeM,.1);
+  mkBuilding(-42,110,13,11,9,whiteM,redRoofM,0);
+  mkBuilding(80,108,12,10,8,creamM,orangeM,-.05);
+  mkBuilding(-10,130,11,9,7,whiteM,blueRoofM,.05);
+  mkBuilding(20,135,10,9,8,creamM,redRoofM,0);
+  mkBuilding(45,132,12,10,7,whiteM,orangeM,-.08);
+  mkBuilding(65,128,11,10,8,creamM,blueRoofM,.06);
+  mkBuilding(-30,128,12,10,8,whiteM,redRoofM,-.05);
+  mkBuilding(-50,122,10,9,7,creamM,orangeM,.12);
+  mkBuilding(85,125,13,11,9,whiteM,blueRoofM,-.04);
+  // Larger town hall / civic building
+  (function(){
+    const g=new THREE.Group();
+    const w2=new THREE.Mesh(new THREE.BoxGeometry(24,13,18),whiteM);w2.position.y=6.5;w2.castShadow=true;w2.receiveShadow=true;g.add(w2);
+    const roof2=new THREE.Mesh(new THREE.BoxGeometry(26,2,20),redRoofM);roof2.position.y=14;roof2.castShadow=true;g.add(roof2);
+    const columns=[[-10,0],[-5,0],[0,0],[5,0],[10,0]].map(([cx])=>{
+      const col=new THREE.Mesh(new THREE.CylinderGeometry(.5,.6,13,8),whiteM);col.position.set(cx,6.5,9.1);return col;
+    });
+    columns.forEach(c=>{c.castShadow=true;g.add(c);});
+    const pediment=new THREE.Mesh(new THREE.ConeGeometry(14,.9,3),redRoofM);pediment.position.set(0,14.5,4);pediment.rotation.y=Math.PI/6;g.add(pediment);
+    g.position.set(30,4,93);scene.add(g);
+    platforms.push({pos:new THREE.Vector3(30,17,93),w:26,d:20,h:17});
+  })();
+
+  // Town roads
+  [[30,115,8,120,0],[30,115,120,8,Math.PI/2],[-5,115,8,60,0]].forEach(([x,z,w2,d2,ry])=>{
+    const road=new THREE.Mesh(new THREE.BoxGeometry(w2,0.2,d2),tileM);road.position.set(x,4.08,z);road.receiveShadow=true;scene.add(road);
+  });
+
+  // Flag poles
+  [[22,97],[38,97]].forEach(([x,z])=>{
+    const g=new THREE.Group();
+    const pole=new THREE.Mesh(new THREE.CylinderGeometry(.07,.09,9,6),metalM);pole.position.y=4.5;g.add(pole);
+    const flag=new THREE.Mesh(new THREE.PlaneGeometry(3,2),new THREE.MeshStandardMaterial({color:0x2266CC,roughness:0.7,side:THREE.DoubleSide}));
+    flag.position.set(1.5,8.5,0);flag.rotation.y=Math.PI/2;g.add(flag);
+    g.position.set(x,4,z);scene.add(g);
+  });
+
+  // Village trees
+  [[-8,98],[60,97],[-45,98],[85,96],[-5,142],[55,140],[-35,140],[80,140],[5,115,1.4],[-55,130]].forEach(([x,z,s])=>mkRndTree(x,4,z,s||1));
+}
+
+function mkRndTree(x,y,z,s){
+  // Wii Sports Resort style — single large perfect sphere on a tapered trunk
+  // Bright solid-color spherical canopy, no sub-spheres, very clean
+  s=s||1;const g=new THREE.Group();
+  // Trunk — tapered, medium brown
+  const trunk=new THREE.Mesh(
+    new THREE.CylinderGeometry(.22*s,.38*s,3.2*s,8),trunkM);
+  trunk.position.y=1.6*s;trunk.castShadow=true;g.add(trunk);
+  // Single large sphere canopy — Wii Sports "lollipop" tree
+  const canM=new THREE.MeshStandardMaterial({
+    color:new THREE.Color().setHSL(.28+Math.random()*.05,.82,.42+Math.random()*.08),
+    roughness:0.82,metalness:0.0});
+  const can=new THREE.Mesh(new THREE.SphereGeometry(3.0*s,12,10),canM);
+  can.position.y=5.5*s;can.castShadow=true;g.add(can);
+  // Small highlight sphere on top (lighter green) — Wii Sports detail
+  const hiM=new THREE.MeshStandardMaterial({
+    color:new THREE.Color().setHSL(.3,.75,.52),roughness:0.8,metalness:0.0});
+  const hi=new THREE.Mesh(new THREE.SphereGeometry(1.4*s,8,6),hiM);
+  hi.position.set(0.3*s,8.0*s,0.2*s);g.add(hi);
+  g.position.set(x,y,z);scene.add(g);
+}
+buildWuhuTown();
+
+// ══════════════════════════════════════════════════════
+// PROMENADE + SEAFRONT
+// ══════════════════════════════════════════════════════
+function buildPromenade(){
+  // Main boardwalk
+  const prom=new THREE.Mesh(new THREE.BoxGeometry(240,0.2,14),woodM);
+  prom.position.set(30,4.08,170);prom.receiveShadow=true;scene.add(prom);
+  platforms.push({pos:new THREE.Vector3(30,4.2,170),w:240,d:14,h:4.2});
+
+  // Fence both sides
+  for(let i=-110;i<120;i+=5){
+    for(const sz of[163,177]){
+      const post=new THREE.Mesh(new THREE.BoxGeometry(.2,1.2,.2),woodM);post.position.set(30+i,4.8,sz);scene.add(post);
+    }
+    if(i<115){
+      for(const sz of[163,177]){
+        const rail=new THREE.Mesh(new THREE.BoxGeometry(5,.1,.08),woodM);rail.position.set(30+i+2.5,5.2,sz);scene.add(rail);
+      }
+    }
+  }
+  // Lamps
+  for(let x=-100;x<=120;x+=20){
+    const g=new THREE.Group();
+    const pole=new THREE.Mesh(new THREE.CylinderGeometry(.08,.1,4.8,6),metalM);pole.position.y=2.4;g.add(pole);
+    const arm=new THREE.Mesh(new THREE.BoxGeometry(1.3,.09,.09),metalM);arm.position.set(.65,4.9,0);g.add(arm);
+    const lamp=new THREE.Mesh(new THREE.SphereGeometry(.28,6,5),new THREE.MeshBasicMaterial({color:0xFFFF99}));lamp.position.set(1.3,4.8,0);g.add(lamp);
+    const shade=new THREE.Mesh(new THREE.ConeGeometry(.38,.32,6),metalM);shade.position.set(1.3,5.06,0);g.add(shade);
+    g.position.set(30+x,4,176);scene.add(g);
+  }
+  // Connecting road from town to beach
+  const connRoad=new THREE.Mesh(new THREE.BoxGeometry(10,0.18,60),tileM);
+  connRoad.position.set(30,4.06,145);connRoad.receiveShadow=true;scene.add(connRoad);
+}
+buildPromenade();
+
+// ══════════════════════════════════════════════════════
+// RED IRON BRIDGE
+// West anchor: x=75, z=155  (east end of beach road,
+//              well away from Wuhu Town center)
+// East anchor: x=152, z=82  (harbor peninsula approach)
+// Deck flat at y=6.5, gentle arch peaks at y=12 mid-span
+// ══════════════════════════════════════════════════════
+(function buildBridge(){
+  const WX=75,WZ=155,EX=152,EZ=80,DY=6.5;
+  const MX=(WX+EX)/2,MZ=(WZ+EZ)/2;
+  const bPts=[
+    new THREE.Vector3(WX,DY,WZ),
+    new THREE.Vector3(WX+(MX-WX)*.3,DY+3.5,WZ+(MZ-WZ)*.3),
+    new THREE.Vector3(MX,DY+5.8,MZ),
+    new THREE.Vector3(EX+(MX-EX)*.3,DY+3.5,EZ+(MZ-EZ)*.3),
+    new THREE.Vector3(EX,DY,EZ)
+  ];
+  const bCv=new THREE.CatmullRomCurve3(bPts);
+  const N=48;
+  function getR(t){
+    const tn=bCv.getTangent(Math.max(.001,Math.min(.999,t)));
+    return new THREE.Vector3().crossVectors(tn,new THREE.Vector3(0,1,0)).normalize();
+  }
+
+  // Stone approach ramps - 7 steps each for smooth slope
+  const rampM=new THREE.MeshStandardMaterial({map:stoneTx,roughness:.86,color:0xCCBBAA});
+  function mkRamp(x1,z1,x2,z2,y1,y2){
+    const S=7,dx=x2-x1,dz=z2-z1,dy=y2-y1,hl=Math.sqrt(dx*dx+dz*dz);
+    for(let i=0;i<S;i++){
+      const t=(i+.5)/S,cx=x1+dx*t,cz=z1+dz*t,cy=y1+dy*t;
+      const sl=Math.sqrt(dx*dx+dz*dz+dy*dy)/S;
+      const b=new THREE.Mesh(new THREE.BoxGeometry(10,.6,sl+.5),rampM);
+      b.position.set(cx,cy,cz);
+      b.rotation.y=-Math.atan2(z2-z1,x2-x1)+Math.PI/2;
+      b.rotation.x=Math.atan2(dy,hl);
+      b.receiveShadow=true;scene.add(b);
+      // h = top surface Y of ramp box
+      platforms.push({pos:new THREE.Vector3(cx,cy,cz),w:11,d:sl+1,h:cy+.25});
+    }
+  }
+  // West: beach road → bridge (road at y=4.2, bridge at DY)
+  mkRamp(55,155,WX,WZ,4.2,DY);
+  // East: bridge → harbor road
+  mkRamp(EX,EZ,162,65,DY,4.2);
+
+  // Connector roads
+  const rdM2=new THREE.MeshStandardMaterial({map:tileTx,roughness:.82,color:0xCCBBAA});
+  // West beach road stub (connects promenade to bridge west)
+  const r1=new THREE.Mesh(new THREE.BoxGeometry(10,.28,30),rdM2);r1.position.set(43,4.14,158);scene.add(r1);
+  platforms.push({pos:new THREE.Vector3(43,4.28,158),w:10,d:30,h:4.28});
+  // East harbor road stub
+  const r2=new THREE.Mesh(new THREE.BoxGeometry(10,.28,30),rdM2);r2.position.set(160,4.14,67);r2.rotation.y=.2;scene.add(r2);
+  platforms.push({pos:new THREE.Vector3(160,4.28,67),w:10,d:30,h:4.28});
+  // Promenade link eastward
+  const r3=new THREE.Mesh(new THREE.BoxGeometry(35,.28,10),rdM2);r3.position.set(22,4.14,168);scene.add(r3);
+  platforms.push({pos:new THREE.Vector3(22,4.28,168),w:35,d:10,h:4.28});
+
+  // Deck extrusion
+  const dkSh=new THREE.Shape();
+  dkSh.moveTo(-5,0);dkSh.lineTo(5,0);dkSh.lineTo(5,.5);dkSh.lineTo(-5,.5);dkSh.closePath();
+  try{
+    const dk=new THREE.Mesh(new THREE.ExtrudeGeometry(dkSh,{steps:N,bevelEnabled:false,extrudePath:bCv}),ironM);
+    dk.castShadow=true;dk.receiveShadow=true;scene.add(dk);
+  }catch(e){}
+
+  // DENSE collision - platform h = deck top surface (bCv.y + .5 from shape)
+  for(let i=0;i<=N;i++){
+    const p=bCv.getPoint(i/N);
+    platforms.push({pos:new THREE.Vector3(p.x,p.y+.5,p.z),w:11,d:4,h:p.y+.5});
+  }
+
+  // H-frame towers
+  [.28,.72].forEach(t=>{
+    const pt=bCv.getPoint(t),rt=getR(t),tn=bCv.getTangent(t),H=26;
+    for(const s of[-1,1]){
+      const lx=pt.x+rt.x*s*4.6,lz=pt.z+rt.z*s*4.6;
+      const leg=new THREE.Mesh(new THREE.BoxGeometry(1.6,H,1.6),ironM);
+      leg.position.set(lx,pt.y+H/2,lz);leg.castShadow=true;scene.add(leg);
+    }
+    const ry=Math.atan2(tn.x,tn.z);
+    [H,.58*H].forEach(yOff=>{
+      const cb=new THREE.Mesh(new THREE.BoxGeometry(11,1.1,1.1),ironM);
+      cb.position.set(pt.x,pt.y+yOff,pt.z);cb.rotation.y=ry;scene.add(cb);
+    });
+    // Cable stays fan
+    const topY=pt.y+H;
+    for(let c=-6;c<=6;c++){
+      const ct=Math.max(.01,Math.min(.99,t+c*.05));
+      const cp=bCv.getPoint(ct),cr=getR(ct);
+      for(const s of[-1,1]){
+        const ax=cp.x+cr.x*s*4.6,az=cp.z+cr.z*s*4.6;
+        const lx2=pt.x+rt.x*s*4.6,lz2=pt.z+rt.z*s*4.6;
+        const dir=new THREE.Vector3(lx2-ax,topY-cp.y,lz2-az);
+        const cl=dir.length();if(cl<2)continue;
+        const mid=new THREE.Vector3((lx2+ax)/2,(topY+cp.y)/2,(lz2+az)/2);
+        const cab=new THREE.Mesh(new THREE.CylinderGeometry(.07,.07,cl,4),ironM);
+        cab.position.copy(mid);cab.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),dir.normalize());
+        scene.add(cab);
+      }
+    }
+  });
+
+  // Railings both sides
+  for(const s of[-1,1]){
+    const rPts=[];
+    for(let i=0;i<=N;i++){const p=bCv.getPoint(i/N),rt=getR(i/N);rPts.push(new THREE.Vector3(p.x+rt.x*s*5,p.y+1.8,p.z+rt.z*s*5));}
+    const rc=new THREE.CatmullRomCurve3(rPts);
+    const rSh=new THREE.Shape();rSh.moveTo(-.1,0);rSh.lineTo(.1,0);rSh.lineTo(.1,.15);rSh.lineTo(-.1,.15);rSh.closePath();
+    try{scene.add(new THREE.Mesh(new THREE.ExtrudeGeometry(rSh,{steps:N,bevelEnabled:false,extrudePath:rc}),ironM));}catch(e){}
+    for(let i=0;i<=N;i+=2){const p=rPts[i];if(!p)continue;const post=new THREE.Mesh(new THREE.BoxGeometry(.22,1.9,.22),ironM);post.position.set(p.x,p.y-.72,p.z);scene.add(post);}
+  }
+  // Under-deck trusses
+  for(let i=4;i<N-4;i+=5){const p=bCv.getPoint(i/N),tn=bCv.getTangent(i/N);const tr=new THREE.Mesh(new THREE.BoxGeometry(11,.6,.6),ironM);tr.position.set(p.x,p.y-.7,p.z);tr.rotation.y=Math.atan2(tn.x,tn.z);scene.add(tr);}
+  // Gate posts
+  for(const ti of[0,1]){const ep=bCv.getPoint(ti),rt=getR(ti);for(const s of[-1,1]){const gp=new THREE.Mesh(new THREE.BoxGeometry(1.2,7,1.2),ironM);gp.position.set(ep.x+rt.x*s*5.5,ep.y+3,ep.z+rt.z*s*5.5);scene.add(gp);const cap=new THREE.Mesh(new THREE.SphereGeometry(.8,8,6),ironM);cap.position.set(ep.x+rt.x*s*5.5,ep.y+6.8,ep.z+rt.z*s*5.5);scene.add(cap);}}
+
+  window.BRIDGE_CV=bCv;
+})();
+
+// ══════════════════════════════════════════════════════
+// WII SPORTS GOLF COURSE TRAIL
+// Fairway-style path from Wuhu Town north through the
+// 4 graduated hills up to the volcano base.
+// Flanked by Wii-style lollipop sphere trees.
+// ══════════════════════════════════════════════════════
+(function buildGolfTrail(){
+  const fairM=new THREE.MeshStandardMaterial({map:sandTx,roughness:.9,color:0xD0B878});
+
+  // Wii lollipop tree — single large sphere, clean and stylised
+  function wiiTree(x,y,z,s){
+    s=s||1;const g=new THREE.Group();
+    const trunk=new THREE.Mesh(new THREE.CylinderGeometry(.2*s,.34*s,3*s,8),trunkM);
+    trunk.position.y=1.5*s;trunk.castShadow=true;g.add(trunk);
+    const hue=.27+Math.random()*.06;
+    const can=new THREE.Mesh(new THREE.SphereGeometry(2.8*s,12,10),
+      new THREE.MeshStandardMaterial({color:new THREE.Color().setHSL(hue,.84,.43+Math.random()*.09),roughness:.82}));
+    can.position.y=5.2*s;can.castShadow=true;g.add(can);
+    // Highlight dome
+    const hi=new THREE.Mesh(new THREE.SphereGeometry(1.1*s,8,6),
+      new THREE.MeshStandardMaterial({color:new THREE.Color().setHSL(.30,.72,.58),roughness:.75,metalness:.04}));
+    hi.position.set(.22*s,7.5*s,.18*s);g.add(hi);
+    g.position.set(x,y,z);scene.add(g);
+  }
+
+  // Waypoints: leave town going north, climb each hill tier
+  const wp=[
+    [25,4.4,108],[22,5.0,94],[18,6.2,78],[13,7.8,62],
+    [7,9.5,46],[1,11.4,30],[-5,13.6,14],[-9,16.2,-2],
+    [-11,18.8,-18],[-13,22.0,-34],[-14,25.5,-50]
+  ];
+  for(let i=0;i<wp.length-1;i++){
+    const [x1,y1,z1]=wp[i],[x2,y2,z2]=wp[i+1];
+    const dx=x2-x1,dz=z2-z1,dy=y2-y1,hl=Math.sqrt(dx*dx+dz*dz);
+    const seg=new THREE.Mesh(new THREE.BoxGeometry(5.5,.38,hl+.5),fairM);
+    seg.position.set((x1+x2)/2,(y1+y2)/2,(z1+z2)/2);
+    seg.rotation.y=-Math.atan2(dz,dx)+Math.PI/2;
+    seg.rotation.x=Math.atan2(dy,hl);
+    seg.receiveShadow=true;scene.add(seg);
+    const sy=(y1+y2)/2;
+    platforms.push({pos:new THREE.Vector3((x1+x2)/2,sy,(z1+z2)/2),w:6.5,d:hl+1,h:sy+.25});
+    // Lollipop trees flanking every other segment
+    if(i%2===0){
+      const rn=new THREE.Vector3(-dz,0,dx).normalize();
+      wiiTree(x1+rn.x*6.5,y1,z1+rn.z*6.5,.88+Math.random()*.28);
+      wiiTree(x1-rn.x*6.5,y1,z1-rn.z*6.5,.88+Math.random()*.28);
+    }
+  }
+  // Tee marker at start
+  const tm=new THREE.Mesh(new THREE.CylinderGeometry(.15,.15,1.2,5),
+    new THREE.MeshStandardMaterial({color:0xFF4444,roughness:.6}));
+  tm.position.set(25,5.2,108);scene.add(tm);
+
+  // Extra Wii trees — town perimeter + hill flanks + promenade
+  [[-66,4,88],[-66,4,105],[-66,4,122],[-66,4,140],[-66,4,156],
+   [97,4,88],[97,4,105],[97,4,122],[97,4,140],[97,4,156],
+   [-15,4,158],[5,4,163],[25,4,166],[46,4,163],[66,4,158],
+   [-92,4,162],[-72,4,162],[-52,4,162],[-32,4,162],[-12,4,162],
+   [8,4,162],[28,4,162],[48,4,162],[68,4,162],[88,4,162],[108,4,162],
+   [32,9.5,34],[44,9.5,26],[-20,11.5,12],[-34,15.5,-1],[14,15.5,-9],
+   [-10,18,-24],[2,20,-38],[-25,22,-45],
+  ].forEach(([x,y,z])=>wiiTree(x,y,z,.9+Math.random()*.3));
+})();
+
+function buildSummerstoneFalls(){
+  // River channel — flows from falls area south-east toward town
+  const riverPts=[];
+  for(let i=0;i<=20;i++){
+    const t=i/20;
+    riverPts.push(new THREE.Vector3(-35+t*45,16-t*12,-30+t*60));
+  }
+  const riverCv=new THREE.CatmullRomCurve3(riverPts);
+  const riverSh=new THREE.Shape();riverSh.moveTo(-4,0);riverSh.lineTo(4,0);riverSh.lineTo(4,.5);riverSh.lineTo(-4,.5);riverSh.closePath();
+  const river=new THREE.Mesh(new THREE.ExtrudeGeometry(riverSh,{steps:25,bevelEnabled:false,extrudePath:riverCv}),waterRiverM);
+  scene.add(river);
+
+  // Waterfall — vertical column from plateau edge
+  const fallMat=new THREE.MeshStandardMaterial({color:0x88EEFF,transparent:true,opacity:0.75,roughness:0.04,metalness:0.15});
+  for(let i=0;i<3;i++){
+    const fall=new THREE.Mesh(new THREE.BoxGeometry(3+i*.5,18,.5),fallMat);
+    fall.position.set(-35+i*2,7,-30);fall.castShadow=false;scene.add(fall);
+  }
+
+  // Splash pool at base
+  const pool=new THREE.Mesh(new THREE.CylinderGeometry(8,8,1,16),new THREE.MeshStandardMaterial({color:0x44DDFF,transparent:true,opacity:0.8,roughness:0.04,metalness:0.2}));
+  pool.position.set(-33,4.2,-28);scene.add(pool);
+
+  // Foam at base
+  const sprayMat=new THREE.MeshStandardMaterial({color:0xEEFFFF,transparent:true,opacity:.55,roughness:0.7});
+  const spray=new THREE.Mesh(new THREE.CircleGeometry(10,16),sprayMat);
+  spray.rotation.x=-Math.PI/2;spray.position.set(-33,4.5,-28);scene.add(spray);
+
+  // River basin widens
+  const basinMat=new THREE.MeshStandardMaterial({color:0x22CCEE,transparent:true,opacity:0.78,roughness:0.06,metalness:0.18});
+  const basin=new THREE.Mesh(new THREE.PlaneGeometry(16,40),basinMat);
+  basin.rotation.x=-Math.PI/2;basin.position.set(-20,4.1,0);scene.add(basin);
+
+  // Spray particles (static spheres)
+  for(let i=0;i<12;i++){
+    const s=new THREE.Mesh(new THREE.SphereGeometry(.3+Math.random()*.4,5,4),sprayMat);
+    s.position.set(-33+(Math.random()-.5)*8,5+Math.random()*4,-28+(Math.random()-.5)*5);scene.add(s);
+  }
+}
+buildSummerstoneFalls();
+
+// ══════════════════════════════════════════════════════
+// SUMMERSTONE CASTLE — perched on northwest highlands
+// Gothic/medieval style with towers
+// ══════════════════════════════════════════════════════
+function buildSummertoneCastle(){
+  const cx=-65,cy=21,cz=-115;
+
+  // Castle platform / courtyard
+  const court=new THREE.Mesh(new THREE.BoxGeometry(50,2,40),castleM);
+  court.position.set(cx,cy+1,cz);court.castShadow=true;court.receiveShadow=true;scene.add(court);
+
+  // Main keep
+  const keep=new THREE.Mesh(new THREE.BoxGeometry(22,20,18),castleM);
+  keep.position.set(cx,cy+11,cz);keep.castShadow=true;scene.add(keep);
+  // Keep battlements (merlons)
+  for(let i=-4;i<=4;i+=2){
+    const m=new THREE.Mesh(new THREE.BoxGeometry(2.5,3,2.5),castleM);m.position.set(cx+i*2.5,cy+22,cz-8.5);scene.add(m);
+    const m2=m.clone();m2.position.set(cx+i*2.5,cy+22,cz+8.5);scene.add(m2);
+    if(Math.abs(i)>0){const m3=new THREE.Mesh(new THREE.BoxGeometry(2.5,3,2.5),castleM);m3.position.set(cx-9.5,cy+22,cz+i*2);scene.add(m3);}
+  }
+  // Keep pointed roof
+  const keepRoof=new THREE.Mesh(new THREE.ConeGeometry(14,10,4),redRoofM);
+  keepRoof.position.set(cx,cy+27,cz);keepRoof.rotation.y=Math.PI/4;keepRoof.castShadow=true;scene.add(keepRoof);
+
+  // Four corner towers
+  [[-22,-16],[-22,16],[22,-16],[22,16]].forEach(([dx,dz])=>{
+    const tow=new THREE.Mesh(new THREE.CylinderGeometry(4.5,5,24,10),castleM);
+    tow.position.set(cx+dx,cy+12,cz+dz);tow.castShadow=true;scene.add(tow);
+    // Tower battlements
+    for(let i=0;i<8;i++){const a=(i/8)*Math.PI*2;
+      const m=new THREE.Mesh(new THREE.BoxGeometry(1.8,3,1.8),castleM);
+      m.position.set(cx+dx+Math.cos(a)*4.5,cy+25,cz+dz+Math.sin(a)*4.5);scene.add(m);
+    }
+    // Tower roof
+    const tRoof=new THREE.Mesh(new THREE.ConeGeometry(5.5,9,10),blueRoofM);
+    tRoof.position.set(cx+dx,cy+28,cz+dz);tRoof.castShadow=true;scene.add(tRoof);
+    // Tower flag
+    const fp=new THREE.Mesh(new THREE.CylinderGeometry(.1,.12,4,5),metalM);fp.position.set(cx+dx,cy+34,cz+dz);scene.add(fp);
+    const fl=new THREE.Mesh(new THREE.PlaneGeometry(2.2,1.4),new THREE.MeshStandardMaterial({color:0xCC2222,roughness:0.7,side:THREE.DoubleSide}));
+    fl.position.set(cx+dx+1.1,cy+36,cz+dz);fl.rotation.y=.5;scene.add(fl);
+  });
+
+  // Gatehouse + drawbridge
+  const gate=new THREE.Mesh(new THREE.BoxGeometry(12,14,8),castleM);
+  gate.position.set(cx,cy+8,cz+24);gate.castShadow=true;scene.add(gate);
+  const arch=new THREE.Mesh(new THREE.BoxGeometry(5,7,9),new THREE.MeshStandardMaterial({color:0x1A1A1A,roughness:1}));
+  arch.position.set(cx,cy+5.5,cz+24.5);scene.add(arch);
+  // Battlements on gatehouse
+  for(let i=-2;i<=2;i++){
+    const m=new THREE.Mesh(new THREE.BoxGeometry(2,2.5,2),castleM);m.position.set(cx+i*2.5,cy+15.5,cz+24);scene.add(m);
+  }
+  // Drawbridge planks
+  for(let i=0;i<5;i++){
+    const plank=new THREE.Mesh(new THREE.BoxGeometry(4.5,.22,1.6),woodM);plank.position.set(cx,cy+2,cz+28+i*1.65);scene.add(plank);
+  }
+
+  // Connecting walls between towers
+  [[-22,0,3,24,-16],[22,0,3,24,-16],[-22,0,3,24,16],[22,0,3,24,16]].forEach(([dx,_,w2,h2,dz])=>{
+    const wall=new THREE.Mesh(new THREE.BoxGeometry(Math.abs(dx)*2,h2*.6,3),castleM);
+    wall.position.set(cx,cy+h2*.3,cz+dz);wall.castShadow=true;scene.add(wall);
+  });
+
+  // Castle platforms
+  platforms.push({pos:new THREE.Vector3(cx,cy+22,cz),w:22,d:18,h:cy+22});
+  platforms.push({pos:new THREE.Vector3(cx,cy+3,cz),w:50,d:40,h:cy+3});
+
+  // Castle courtyard path + well
+  const well=new THREE.Group();
+  const wb=new THREE.Mesh(new THREE.CylinderGeometry(1.8,2,1.4,12),stoneM);wb.position.y=.7;well.add(wb);
+  const wr=new THREE.Mesh(new THREE.TorusGeometry(1.8,.14,6,14),stoneM);wr.position.y=1.5;well.add(wr);
+  const wp1=new THREE.Mesh(new THREE.BoxGeometry(.15,.15,3.6),woodM);wp1.position.set(-1.8,2.2,0);wp1.rotation.z=Math.PI/2;well.add(wp1);
+  const wp2=wp1.clone();wp2.position.set(1.8,2.2,0);well.add(wp2);
+  const wcb=new THREE.Mesh(new THREE.BoxGeometry(3.6,.15,.15),woodM);wcb.position.y=3.0;well.add(wcb);
+  well.position.set(cx+12,cy+2,cz+8);scene.add(well);
+}
+buildSummertoneCastle();
+
+// ══════════════════════════════════════════════════════
+// HARBOR & DOCKS — east coast
+// ══════════════════════════════════════════════════════
+function buildHarbor(){
+  // Harbor road from town
+  const hrd=new THREE.Mesh(new THREE.BoxGeometry(8,0.2,80),tileM);
+  hrd.position.set(90,4.08,80);hrd.receiveShadow=true;scene.add(hrd);
+
+  // Three piers
+  function mkPier(x,z,len,ry){
+    const g=new THREE.Group();
+    for(let i=0;i<len;i++){
+      const pl=new THREE.Mesh(new THREE.BoxGeometry(5.5,.18,.8),woodM);pl.position.set(0,.22,i*.82);g.add(pl);
+    }
+    for(let i=0;i<len;i+=4)for(const sx of[-2.5,2.5]){
+      const p=new THREE.Mesh(new THREE.CylinderGeometry(.11,.13,2.8,5),darkWoodM);p.position.set(sx,-.9,i*.82);g.add(p);
+    }
+    for(const sx of[-2.8,2.8]){
+      for(let i=0;i<len;i+=3){const rp=new THREE.Mesh(new THREE.CylinderGeometry(.055,.055,1,4),woodM);rp.position.set(sx,.7,i*.82);g.add(rp);}
+      const rail=new THREE.Mesh(new THREE.BoxGeometry(.1,.12,len*.82),woodM);rail.position.set(sx,1.15,len*.82/2);g.add(rail);
+    }
+    g.position.set(x,4.2,z);g.rotation.y=ry||0;scene.add(g);
+    platforms.push({pos:new THREE.Vector3(x,4.4,z+len*.41),w:6,d:len*.82,h:4.4});
+  }
+  mkPier(100,25,28,0);mkPier(118,38,22,-.18);mkPier(88,15,20,.14);
+
+  // Harbor buildings
+  function mkWarehouse(x,z,w2,d2,h2){
+    const g=new THREE.Group();
+    const wl=new THREE.Mesh(new THREE.BoxGeometry(w2,h2,d2),new THREE.MeshStandardMaterial({color:0xBB5533,roughness:0.75}));
+    wl.position.y=h2/2;wl.castShadow=true;g.add(wl);
+    const rf=new THREE.Mesh(new THREE.CylinderGeometry(0,w2*.6,.6*d2,4),new THREE.MeshStandardMaterial({color:0x774422,roughness:0.8}));
+    rf.position.y=h2+.3;rf.rotation.y=Math.PI/4;rf.castShadow=true;g.add(rf);
+    g.position.set(x,4,z);scene.add(g);
+  }
+  mkWarehouse(118,80,18,14,9);mkWarehouse(108,95,14,11,7);mkWarehouse(130,72,12,10,7);
+
+  // COCOBA HOTEL — east coast, large resort building
+  (function(){
+    const g=new THREE.Group();
+    // Main building — white hotel
+    const main=new THREE.Mesh(new THREE.BoxGeometry(30,18,22),whiteM);main.position.y=9;main.castShadow=true;g.add(main);
+    // Flat roof with parapet
+    const roofFlat=new THREE.Mesh(new THREE.BoxGeometry(32,1,24),new THREE.MeshStandardMaterial({color:0xEEEADD,roughness:0.7}));roofFlat.position.y=19;g.add(roofFlat);
+    // Pool on roof
+    const pool=new THREE.Mesh(new THREE.BoxGeometry(10,0.5,8),new THREE.MeshStandardMaterial({color:0x44BBFF,transparent:true,opacity:0.85,roughness:0.04}));pool.position.set(0,19.6,0);g.add(pool);
+    // Side wings
+    [-18,18].forEach(dx=>{
+      const wing=new THREE.Mesh(new THREE.BoxGeometry(10,14,18),whiteM);wing.position.set(dx,7,0);wing.castShadow=true;g.add(wing);
+    });
+    // Balconies (rows of small ledges)
+    for(let floor=0;floor<4;floor++)for(let i=-12;i<=12;i+=4){
+      const bal=new THREE.Mesh(new THREE.BoxGeometry(3.5,.4,2),new THREE.MeshStandardMaterial({color:0xEEE8D8,roughness:0.6}));
+      bal.position.set(i,4+floor*3.5,11.5);g.add(bal);
+    }
+    // Entrance canopy
+    const can=new THREE.Mesh(new THREE.BoxGeometry(14,.5,5),new THREE.MeshStandardMaterial({color:0xFFDD66,roughness:0.7}));can.position.set(0,4.5,13.5);g.add(can);
+    // Swimming pool beside hotel
+    const pool2=new THREE.Mesh(new THREE.BoxGeometry(20,0.6,14),new THREE.MeshStandardMaterial({color:0x33CCFF,transparent:true,opacity:0.88,roughness:0.04}));pool2.position.set(-18,0.5,-6);g.add(pool2);
+    const poolDeck=new THREE.Mesh(new THREE.BoxGeometry(26,0.4,20),new THREE.MeshStandardMaterial({color:0xF5ECD8,roughness:0.7}));poolDeck.position.set(-18,0.2,-6);g.add(poolDeck);
+    g.position.set(148,4,25);scene.add(g);
+    platforms.push({pos:new THREE.Vector3(148,22,25),w:52,d:24,h:22});
+    platforms.push({pos:new THREE.Vector3(148,4,25),w:52,d:24,h:4});
+  })();
+
+  // Moored sailboats
+  function mkBoat(x,z,ry){
+    const g=new THREE.Group();
+    const hull=new THREE.Mesh(new THREE.CylinderGeometry(1.6,2.2,1.3,8,1,false,0,Math.PI),new THREE.MeshStandardMaterial({color:0xEEEECC,roughness:0.7}));
+    hull.rotation.z=Math.PI;hull.position.y=.1;g.add(hull);
+    const deck=new THREE.Mesh(new THREE.BoxGeometry(3.8,.22,6),woodM);deck.position.y=.75;g.add(deck);
+    const mast=new THREE.Mesh(new THREE.CylinderGeometry(.09,.11,8,5),woodM);mast.position.set(.5,5,.5);g.add(mast);
+    const sail=new THREE.Mesh(new THREE.PlaneGeometry(3,5.5),new THREE.MeshStandardMaterial({color:0xFFFFEE,roughness:0.8,side:THREE.DoubleSide}));
+    sail.position.set(.5,5.5,0);sail.rotation.y=.3;g.add(sail);
+    g.position.set(x,.2,z);g.rotation.y=ry||0;scene.add(g);
+  }
+  mkBoat(105,18,.3);mkBoat(120,28,-.22);mkBoat(96,8,.8);mkBoat(132,20,1.2);mkBoat(112,42,-.5);
+
+  // LIGHTHOUSE — east cape
+  (function(){
+    const g=new THREE.Group();
+    const tow=new THREE.Mesh(new THREE.CylinderGeometry(2.4,3.2,20,12),whiteM);tow.position.y=10;tow.castShadow=true;g.add(tow);
+    for(let i=0;i<4;i++){const band=new THREE.Mesh(new THREE.CylinderGeometry(2.45,2.45,1.6,12),redRoofM);band.position.y=3+i*5;g.add(band);}
+    const lantern=new THREE.Mesh(new THREE.CylinderGeometry(2,2.2,2.2,10),metalM);lantern.position.y=21.5;g.add(lantern);
+    const lgt=new THREE.Mesh(new THREE.SphereGeometry(1,8,6),new THREE.MeshBasicMaterial({color:0xFFFF88}));lgt.position.y=23.2;g.add(lgt);
+    const cap=new THREE.Mesh(new THREE.ConeGeometry(2.2,2.4,10),redRoofM);cap.position.y=24.5;cap.castShadow=true;g.add(cap);
+    const lhLight=new THREE.PointLight(0xFFFF88,2,80);lhLight.position.y=23;g.add(lhLight);
+    g.position.set(168,4,15);scene.add(g);
+  })();
+}
+buildHarbor();
+
+// ══════════════════════════════════════════════════════
+// MAKA WUHU VOLCANO — trails and details
+// ══════════════════════════════════════════════════════
+function buildVolcano(){
+  // Inline volcano height formula (matches getTerrainHeight volcano section)
+  // Used here because getTerrainHeight is declared after buildVolcano() is called
+  function volcH(x,z){
+    const dv=Math.sqrt((x+14)*(x+14)+(z+72)*(z+72));
+    if(dv<30)  return 63.0+(1-dv/30)*22.0;
+    if(dv<48)  return 46.0+(1-dv/48)*17.0;
+    if(dv<66)  return 31.0+(1-dv/66)*15.0;
+    if(dv<88)  return 18.0+(1-dv/88)*13.0;
+    if(dv<112) return 3.5+(1-dv/112)*14.5;
+    return 3.5;
+  }
+
+  // ─── SPIRAL TRAIL — tighter switchbacks, sample height at each point ───
+  const trailPts=[];
+  const STEPS=60;
+  for(let i=0;i<=STEPS;i++){
+    const t=i/STEPS;
+    const a=t*Math.PI*4.5;      // 2.25 full rotations up
+    const radius=105-t*80;      // spirals in from r=105 to r=25
+    const rx=-14+Math.cos(a)*radius;
+    const rz=-72+Math.sin(a)*radius;
+    const ry=volcH(rx,rz);
+    trailPts.push(new THREE.Vector3(rx,ry,rz));
+  }
+  // Smooth heights to remove kinks
+  for(let pass=0;pass<3;pass++){
+    for(let i=1;i<trailPts.length-1;i++){
+      trailPts[i].y=(trailPts[i-1].y+trailPts[i].y*2+trailPts[i+1].y)/4;
+    }
+  }
+  const trailCv=new THREE.CatmullRomCurve3(trailPts);
+
+  // Draw trail path mesh
+  const trailSh=new THREE.Shape();
+  trailSh.moveTo(-3,0);trailSh.lineTo(3,0);trailSh.lineTo(3,.55);trailSh.lineTo(-3,.55);trailSh.closePath();
+  try{
+    scene.add(new THREE.Mesh(
+      new THREE.ExtrudeGeometry(trailSh,{steps:55,bevelEnabled:false,extrudePath:trailCv}),
+      new THREE.MeshStandardMaterial({map:sandTx,roughness:0.9,color:0xCAAA78})));
+  }catch(e){}
+
+  // Dense collision platforms every step — must be close enough to always overlap
+  for(let i=0;i<=STEPS;i++){
+    const p=trailCv.getPoint(i/STEPS);
+    platforms.push({pos:new THREE.Vector3(p.x,p.y+0.4,p.z),w:8,d:8,h:p.y+0.4});
+  }
+
+  // ─── LAVA STREAMS ───
+  const lavaSt=new THREE.MeshStandardMaterial({color:0xFF3300,roughness:0.4,emissive:0xFF2200,emissiveIntensity:0.5,transparent:true,opacity:0.85});
+  [0,72,144,216].forEach(ang=>{
+    const a=ang*Math.PI/180;
+    const stream=new THREE.Mesh(new THREE.BoxGeometry(2.5,30,1.2),lavaSt);
+    stream.position.set(-14+Math.cos(a)*22,52,-72+Math.sin(a)*22);
+    stream.rotation.set(.5,a,0);scene.add(stream);
+  });
+
+  // ─── DENSE PINES on lower slopes ───
+  function mkPine(x,y,z,h){
+    const g=new THREE.Group();
+    const trunk=new THREE.Mesh(new THREE.CylinderGeometry(.22,.36,h*.32,6),trunkM);trunk.position.y=h*.16;g.add(trunk);
+    [h*.48,h*.65,h*.80,h*.92].forEach((cy,i)=>{
+      const r=h*(.3-.06*i);
+      const cone=new THREE.Mesh(new THREE.ConeGeometry(r,h*.2,8),leafDkM);cone.position.y=cy;g.add(cone);
+    });
+    g.position.set(x,y,z);scene.add(g);
+  }
+  for(let i=0;i<65;i++){
+    const a=Math.random()*Math.PI*2;
+    const r=32+Math.random()*62;
+    const rx=-14+Math.cos(a)*r,rz=-72+Math.sin(a)*r;
+    const ry=volcH(rx,rz);
+    if(ry<40) mkPine(rx,ry,rz,5+Math.random()*4.5);
+  }
+
+  // ─── SUMMIT VIEWING PLATFORM ───
+  (function(){
+    const g=new THREE.Group();
+    const pf=new THREE.Mesh(new THREE.CylinderGeometry(9,10,1.5,14),stoneM);pf.position.y=.75;g.add(pf);
+    for(let i=0;i<16;i++){
+      const a=(i/16)*Math.PI*2;
+      const post=new THREE.Mesh(new THREE.CylinderGeometry(.1,.1,1.8,4),metalM);
+      post.position.set(Math.cos(a)*9,1.5,Math.sin(a)*9);g.add(post);
+    }
+    const ring2=new THREE.Mesh(new THREE.TorusGeometry(9,.09,4,32),metalM);ring2.position.y=2.1;g.add(ring2);
+    const fp=new THREE.Mesh(new THREE.CylinderGeometry(.12,.14,5,5),metalM);fp.position.set(6,2.5,0);g.add(fp);
+    const fl=new THREE.Mesh(new THREE.PlaneGeometry(3,1.8),new THREE.MeshStandardMaterial({color:0xFF3311,roughness:0.7,side:THREE.DoubleSide}));
+    fl.position.set(7.5,5,0);fl.rotation.y=.4;g.add(fl);
+    g.position.set(-12,85.5,-81);scene.add(g);
+    platforms.push({pos:new THREE.Vector3(-12,87.5,-81),w:22,d:22,h:87.5});
+  })();
+
+  // Crater rim walkway platforms
+  for(let i=0;i<20;i++){
+    const a=(i/20)*Math.PI*2;
+    platforms.push({pos:new THREE.Vector3(-12+Math.cos(a)*15,84.5,-81+Math.sin(a)*15),w:9,d:9,h:84.5});
+  }
+}
+buildVolcano();
+
+// ══════════════════════════════════════════════════════
+// FOREST ZONE — northwest hills
+// ══════════════════════════════════════════════════════
+function buildForest(){
+  // Dense trees
+  const fp=[[-60,-45],[-75,-35],[-88,-50],[-70,-60],[-55,-65],[-82,-70],[-95,-55],
+    [-65,-80],[-80,-85],[-50,-80],[-92,-40],[-108,-50],[-98,-65],[-75,-90],[-62,-92],
+    [-88,-95],[-108,-80],[-120,-65],[-112,-40],[-100,-30],[-88,-22]];
+  fp.forEach(([x,z])=>mkRndTree(x,4+Math.max(0,(-z-30)/8),z,.9+Math.random()*.4));
+
+  // Stone well in clearing
+  (function(){
+    const g=new THREE.Group();
+    const wb=new THREE.Mesh(new THREE.CylinderGeometry(1.6,1.7,1.3,12),stoneM);wb.position.y=.65;g.add(wb);
+    const wr=new THREE.Mesh(new THREE.TorusGeometry(1.6,.12,6,14),stoneM);wr.position.y=1.4;g.add(wr);
+    const wxa=new THREE.Mesh(new THREE.BoxGeometry(.12,.12,3.2),woodM);wxa.position.set(-1.6,2.1,0);wxa.rotation.z=Math.PI/2;g.add(wxa);
+    const wxb=wxa.clone();wxb.position.set(1.6,2.1,0);g.add(wxb);
+    const wxcb=new THREE.Mesh(new THREE.BoxGeometry(3.2,.12,.12),woodM);wxcb.position.y=2.8;g.add(wxcb);
+    g.position.set(-80,-55<-40?14:4,-55);scene.add(g);
+  })();
+
+  // Forest path
+  const fpPts=[];
+  for(let i=0;i<=16;i++){const t=i/16;fpPts.push(new THREE.Vector3(-40-t*55,4+t*8,-40-t*55));}
+  const fpCv=new THREE.CatmullRomCurve3(fpPts);
+  const fpSh=new THREE.Shape();fpSh.moveTo(-2,0);fpSh.lineTo(2,0);fpSh.lineTo(2,.3);fpSh.lineTo(-2,.3);fpSh.closePath();
+  scene.add(new THREE.Mesh(new THREE.ExtrudeGeometry(fpSh,{steps:22,bevelEnabled:false,extrudePath:fpCv}),sandM));
+}
+buildForest();
+
+// ══════════════════════════════════════════════════════
+// EVERGREEN GROVE — large dense conifer forest
+// Located in the Mountain Area on volcano slopes NW
+// ══════════════════════════════════════════════════════
+(function buildEvergreenGrove(){
+  function mkEvergreen(x,y,z,h){
+    const g=new THREE.Group();
+    const trunk=new THREE.Mesh(new THREE.CylinderGeometry(.25,.4,h*.3,7),trunkM);
+    trunk.position.y=h*.15;trunk.castShadow=true;g.add(trunk);
+    // 4 tiered cones — classic evergreen silhouette
+    const coneH=h*.22;
+    [[0,h*.42,h*.3],[0,h*.58,h*.24],[0,h*.72,h*.18],[0,h*.85,h*.12]].forEach(([,cy,cr])=>{
+      const cone=new THREE.Mesh(new THREE.ConeGeometry(cr,coneH,8),leafDkM);
+      cone.position.y=cy;cone.castShadow=true;g.add(cone);
+    });
+    g.position.set(x,y,z);scene.add(g);
+  }
+
+  // Dense grove in northwest mountain area
+  const grovePositions=[
+    [-55,-42],[-65,-38],[-72,-50],[-60,-55],[-50,-60],[-68,-65],[-80,-58],
+    [-48,-70],[-58,-75],[-72,-78],[-85,-68],[-92,-58],[-78,-48],[-64,-44],
+    [-52,-48],[-44,-54],[-90,-45],[-98,-52],[-88,-38],[-76,-35],[-62,-32],
+    [-50,-36],[-42,-45],[-95,-62],[-102,-72],[-88,-82],[-72,-88],[-58,-85],
+    [-45,-78],[-38,-62],[-42,-38],[-55,-28],[-68,-24],[-80,-28],[-92,-34],
+    [-105,-44],[-112,-58],[-108,-70],[-98,-80],[-84,-88],[-68,-92],[-52,-90]
+  ];
+  grovePositions.forEach(([x,z])=>{
+    const elev=4+Math.max(0,(-z-20)/6);
+    mkEvergreen(x,elev,z,6+Math.random()*5);
+  });
+
+  // Grove clearing — a small open grassy patch in the middle
+  const clearing=new THREE.Mesh(new THREE.CylinderGeometry(12,12,.5,12),grassM);
+  clearing.position.set(-72,-55<-40?14:4,-55);scene.add(clearing);
+
+  ZONES.push({name:'Evergreen Grove',cx:-72,cz:-55,r:65});
+})();
+
+// ══════════════════════════════════════════════════════
+// WIND ORCHARD — near Wuhu Town
+// Rows of fruit trees with windmills
+// ══════════════════════════════════════════════════════
+(function buildWindOrchard(){
+  // Orchard trees — low round fruit trees in rows
+  function mkOrchardTree(x,y,z){
+    const g=new THREE.Group();
+    const trunk=new THREE.Mesh(new THREE.CylinderGeometry(.22,.3,2.5,6),trunkM);
+    trunk.position.y=1.25;g.add(trunk);
+    // Round bright canopy
+    const can=new THREE.Mesh(new THREE.SphereGeometry(2.2,8,6),leafM);
+    can.position.y=4.2;can.scale.set(1,.75,1);g.add(can);
+    // Fruit dots
+    for(let i=0;i<5;i++){
+      const fr=new THREE.Mesh(new THREE.SphereGeometry(.18,5,4),
+        new THREE.MeshStandardMaterial({color:0xFF4422,roughness:0.7,emissive:0xCC2200,emissiveIntensity:.2}));
+      fr.position.set((Math.random()-.5)*2.5,3.5+Math.random()*1.5,(Math.random()-.5)*2.5);g.add(fr);
+    }
+    g.position.set(x,y,z);scene.add(g);
+  }
+  // Rows of orchard trees — between town and frontal mountain
+  for(let row=0;row<5;row++)for(let col=0;col<6;col++){
+    mkOrchardTree(-55+col*8,4,55+row*7);
+  }
+
+  // Windmills — two large ones on a hill in the orchard
+  function mkWindmill(x,y,z){
+    const g=new THREE.Group();
+    // Body
+    const body=new THREE.Mesh(new THREE.CylinderGeometry(2,3.5,10,8),creamM);
+    body.position.y=5;body.castShadow=true;g.add(body);
+    // Conical roof
+    const roof3=new THREE.Mesh(new THREE.ConeGeometry(2.8,4,8),redRoofM);
+    roof3.position.y=11.5;g.add(roof3);
+    // Windows
+    const winM3=new THREE.MeshStandardMaterial({color:0x88CCFF,roughness:0.1,transparent:true,opacity:0.7});
+    for(let i=0;i<3;i++){
+      const wi=new THREE.Mesh(new THREE.BoxGeometry(1,.8,.2),winM3);
+      wi.position.set(0,3+i*2.8,2.8);g.add(wi);
+    }
+    // Door
+    const dr=new THREE.Mesh(new THREE.BoxGeometry(1.2,2,.2),darkWoodM);dr.position.set(0,1,2.8);g.add(dr);
+    // Sail hub
+    const hub=new THREE.Mesh(new THREE.CylinderGeometry(.4,.4,.6,8),metalM);
+    hub.rotation.x=Math.PI/2;hub.position.set(0,8,3.2);g.add(hub);
+    // 4 sail blades
+    for(let i=0;i<4;i++){
+      const a=(i/4)*Math.PI*2;
+      const blade=new THREE.Mesh(new THREE.BoxGeometry(.6,5,.12),creamM);
+      blade.position.set(Math.cos(a)*2.8,8+Math.sin(a)*2.8,3.2);
+      blade.rotation.z=a;g.add(blade);
+    }
+    g.position.set(x,y,z);scene.add(g);
+    platforms.push({pos:new THREE.Vector3(x,y+11,z),w:8,d:8,h:y+11});
+  }
+  mkWindmill(-35,4,62);
+  mkWindmill(-50,4,68);
+  mkWindmill(-22,4,58);
+
+  ZONES.push({name:'Wind Orchard',cx:-38,cz:65,r:45});
+})();
+
+// ══════════════════════════════════════════════════════
+// PALM TREES — coastline
+// ══════════════════════════════════════════════════════
+function mkPalm(x,y,z,lean,ld){
+  const g=new THREE.Group();
+  const cv=new THREE.CatmullRomCurve3([new THREE.Vector3(0,0,0),new THREE.Vector3(lean*.3,3,.05),new THREE.Vector3(lean*.7,6,.08),new THREE.Vector3(lean,9.5,0)]);
+  const tube=new THREE.Mesh(new THREE.TubeGeometry(cv,10,.3,6,false),palmTrunkM);tube.castShadow=true;g.add(tube);
+  const tp=cv.getPoint(1);
+  for(let i=0;i<8;i++){
+    const a=(i/8)*Math.PI*2;
+    const frond=new THREE.Mesh(new THREE.PlaneGeometry(.9,4.5),palmLeafM);
+    frond.position.set(tp.x+Math.cos(a)*1.6,tp.y-.3,tp.z+Math.sin(a)*1.6);
+    frond.rotation.y=a;frond.rotation.x=.52+Math.random()*.32;frond.castShadow=true;g.add(frond);
+  }
+  for(let i=0;i<2;i++){const cn=new THREE.Mesh(new THREE.SphereGeometry(.2,5,5),new THREE.MeshStandardMaterial({color:0x664422,roughness:0.9}));cn.position.set(tp.x+(Math.random()-.5)*.5,tp.y-.4,tp.z+(Math.random()-.5)*.5);g.add(cn);}
+  g.position.set(x,y||4,z);if(ld!==undefined)g.rotation.y=ld;scene.add(g);
+}
+// Sweet Beach palms
+[[100,4,180,-1.3,.5],[130,4,168,-1.5,1.2],[160,4,185,-1.4,1.8],[90,4,195,-1.2,.2],[155,4,205,-1.6,2.2],
+ [175,4,190,-1.3,2.5],[115,4,218,-1.4,.8],[145,4,222,-1.5,1.5],[80,4,175,-1.2,-.2],[170,4,170,-1.4,2.8],
+// Promenade/south palms
+ [-30,4,180,-1.2,-.5],[-60,4,175,-1.3,-1.1],[-90,4,185,-1.4,-1.6],[-50,4,195,-1.3,-.8],
+ [20,4,190,-1.1,.1],[-10,4,200,-1.2,-.1],[50,4,188,-1.4,.9],[-80,4,165,-1.2,-1.4],
+// Harbor palms
+ [88,4,48,-1.3,1.5],[110,4,52,-1.2,1.8],[132,4,45,-1.4,2.1],
+// Cocoba resort palms
+ [130,4,8,-1.3,1.4],[168,4,15,-1.4,2.6],[155,4,42,-1.2,2.0],
+// Private island palms
+ [-228,3,52,-1.2,.3],[-238,3,62,-1.4,-.5],[-225,3,70,-1.3,-1.0],
+].forEach(p=>mkPalm(...p));
+
+// ══════════════════════════════════════════════════════
+// ISLAND LOOP ROAD — the ring road around Wuhu Island
+// Runs: Harbor (E) → Sweet Beach (SE) → Promenade (S)
+//       → Town (center) → Bridge (E-center)
+//       → Rear Mountain Base (N) → Ruins Mesa (NW-rear)
+//       → Volcano base (N-center) → back down W side
+// ══════════════════════════════════════════════════════
+(function buildLoopRoad(){
+  const roadM=new THREE.MeshStandardMaterial({map:tileTx,roughness:0.82,metalness:0.0,color:0xD8CEB8});
+  const roadSh=new THREE.Shape();
+  roadSh.moveTo(-4,0);roadSh.lineTo(4,0);roadSh.lineTo(4,.28);roadSh.lineTo(-4,.28);roadSh.closePath();
+
+  // Road waypoints — full circuit around island
+  const loopWaypoints=[
+    // Start: Harbor dock
+    new THREE.Vector3(90,4.1,70),
+    new THREE.Vector3(110,4.1,90),
+    new THREE.Vector3(130,4.1,120),
+    // → Sweet Beach
+    new THREE.Vector3(155,4.1,160),
+    new THREE.Vector3(150,4.1,200),
+    new THREE.Vector3(130,4.1,230),
+    // → Promenade south
+    new THREE.Vector3(80,4.1,240),
+    new THREE.Vector3(30,4.1,240),
+    new THREE.Vector3(-30,4.1,235),
+    new THREE.Vector3(-80,4.1,225),
+    // → West bay
+    new THREE.Vector3(-130,4.1,190),
+    new THREE.Vector3(-160,4.1,140),
+    new THREE.Vector3(-168,4.1,80),
+    // → Pirate's Eye peninsula junction
+    new THREE.Vector3(-155,4.5,30),
+    new THREE.Vector3(-140,5,0),
+    // → Rear mountain base — road climbs NW
+    new THREE.Vector3(-125,6,-30),
+    new THREE.Vector3(-110,8,-60),
+    // → Mysterious Ruins entrance (rear)
+    new THREE.Vector3(-105,10,-100),
+    new THREE.Vector3(-90,12,-130),
+    new THREE.Vector3(-75,14,-150),
+    // → Behind volcano, east side
+    new THREE.Vector3(-40,12,-160),
+    new THREE.Vector3(-10,12,-155),
+    new THREE.Vector3(20,11,-140),
+    // → Summit approach road
+    new THREE.Vector3(40,10,-120),
+    new THREE.Vector3(55,8,-95),
+    new THREE.Vector3(60,6,-70),
+    // → Back down to harbor
+    new THREE.Vector3(70,5,-40),
+    new THREE.Vector3(80,4.5,-10),
+    new THREE.Vector3(88,4.2,30),
+    new THREE.Vector3(90,4.1,70),
+  ];
+
+  const loopCv=new THREE.CatmullRomCurve3(loopWaypoints,true);
+
+  // Build road mesh in segments to avoid huge single extrude
+  for(let seg=0;seg<6;seg++){
+    const segPts=[];
+    for(let i=0;i<=25;i++){
+      const t=(seg*25+i)/(6*25);
+      segPts.push(loopCv.getPoint(t));
+    }
+    const segCv=new THREE.CatmullRomCurve3(segPts);
+    try{
+      const road=new THREE.Mesh(new THREE.ExtrudeGeometry(roadSh,{steps:24,bevelEnabled:false,extrudePath:segCv}),roadM);
+      road.receiveShadow=true;scene.add(road);
+    }catch(e){}
+    // Collision platforms along road
+    for(let i=0;i<segPts.length;i+=3){
+      const p=segPts[i];
+      platforms.push({pos:new THREE.Vector3(p.x,p.y+.4,p.z),w:10,d:6,h:p.y+.4});
+    }
+  }
+
+  // Road kerb markers — white/red striped kerb posts every 20 units
+  for(let i=0;i<120;i++){
+    const t=i/120;
+    const p=loopCv.getPoint(t);
+    const tn=loopCv.getTangent(t);
+    const rt=new THREE.Vector3().crossVectors(tn,new THREE.Vector3(0,1,0)).normalize();
+    for(const side of[-1,1]){
+      const post=new THREE.Mesh(new THREE.CylinderGeometry(.12,.14,.9,6),
+        i%3===0?new THREE.MeshStandardMaterial({color:0xFF3333,roughness:0.6}):
+                new THREE.MeshStandardMaterial({color:0xFFFFFF,roughness:0.6}));
+      post.position.set(p.x+rt.x*side*4.4,p.y+.45,p.z+rt.z*side*4.4);
+      scene.add(post);
+    }
+  }
+
+  // Road signs at key junctions
+  function mkSign(x,y,z,text,ry){
+    const g=new THREE.Group();
+    const pole=new THREE.Mesh(new THREE.CylinderGeometry(.1,.1,2.8,6),metalM);pole.position.y=1.4;g.add(pole);
+    const board=new THREE.Mesh(new THREE.BoxGeometry(3.5,.12,1.2),new THREE.MeshStandardMaterial({color:0x226622,roughness:0.7}));
+    board.position.y=2.8;g.add(board);
+    const face=new THREE.Mesh(new THREE.BoxGeometry(3.4,.06,1.1),new THREE.MeshStandardMaterial({color:0x44AA44,roughness:0.6}));
+    face.position.y=2.87;g.add(face);
+    g.position.set(x,y,z);g.rotation.y=ry||0;scene.add(g);
+  }
+  mkSign(92,4.2,65, 'HARBOR',0);
+  mkSign(145,4.2,155,'SWEET BEACH',-.4);
+  mkSign(-105,9,-98, 'RUINS',-.8);
+  mkSign(55,8,-92,   'SUMMIT',0.3);
+  mkSign(-140,5.5,2, "PIRATE'S EYE",.5);
+})();
+
+// ══════════════════════════════════════════════════════
+// VOLCANO TUNNEL — through the mountain base
+// Entrance on east side of volcano, exits west side
+// ══════════════════════════════════════════════════════
+(function buildTunnel(){
+  const tunM=new THREE.MeshStandardMaterial({map:stoneTx,roughness:0.9,metalness:0.02,color:0x443830,side:THREE.BackSide});
+  const tunOuterM=new THREE.MeshStandardMaterial({map:volcTx,roughness:0.92,metalness:0.04,color:0x554844});
+
+  // Tunnel path curves through volcano base
+  const tunPts=[
+    new THREE.Vector3(55,5,-55),   // east entrance
+    new THREE.Vector3(30,6,-65),
+    new THREE.Vector3(10,7,-72),
+    new THREE.Vector3(-10,7,-75),  // mid-tunnel
+    new THREE.Vector3(-30,7,-72),
+    new THREE.Vector3(-48,6,-65),
+    new THREE.Vector3(-60,5,-58),  // west exit
+  ];
+  const tunCv=new THREE.CatmullRomCurve3(tunPts);
+
+  // Tunnel tube (hollow cylinder along path)
+  const tunGeo=new THREE.TubeGeometry(tunCv,30,5.5,10,false);
+  const tun=new THREE.Mesh(tunGeo,tunM);scene.add(tun);
+
+  // Outer rock portals at each entrance
+  function mkPortal(x,y,z,ry){
+    const g=new THREE.Group();
+    // Arch frame
+    const archL=new THREE.Mesh(new THREE.BoxGeometry(2.5,12,2.5),tunOuterM);archL.position.set(-5.5,6,0);g.add(archL);
+    const archR=new THREE.Mesh(new THREE.BoxGeometry(2.5,12,2.5),tunOuterM);archR.position.set(5.5,6,0);g.add(archR);
+    const archTop=new THREE.Mesh(new THREE.BoxGeometry(13,3,2.5),tunOuterM);archTop.position.set(0,12.5,0);g.add(archTop);
+    // Keystone
+    const ks=new THREE.Mesh(new THREE.BoxGeometry(3,3.5,2.8),stoneM);ks.position.set(0,11,0);g.add(ks);
+    // Torch brackets
+    for(const tx of[-3.5,3.5]){
+      const torch=new THREE.Mesh(new THREE.CylinderGeometry(.2,.3,1.2,5),darkWoodM);torch.position.set(tx,8.5,.5);g.add(torch);
+      const flame=new THREE.Mesh(new THREE.ConeGeometry(.4,1,6),new THREE.MeshStandardMaterial({color:0xFF8800,emissive:0xFF4400,emissiveIntensity:0.8,roughness:0.4}));
+      flame.position.set(tx,9.5,.5);g.add(flame);
+      const fl=new THREE.PointLight(0xFF6600,1.5,20);fl.position.set(tx,9.8,.5);g.add(fl);
+    }
+    g.position.set(x,y,z);g.rotation.y=ry||0;scene.add(g);
+  }
+  mkPortal(55,4,-52,-.4);
+  mkPortal(-60,4,-55,.6);
+
+  // Tunnel interior details — torch lights and stalactites
+  for(let i=1;i<=5;i++){
+    const t=i/6;
+    const p=tunCv.getPoint(t);
+    // Interior torch
+    const tl=new THREE.PointLight(0xFF7700,.8,22);tl.position.set(p.x,p.y+3.5,p.z);scene.add(tl);
+    // Stalactite
+    const stal=new THREE.Mesh(new THREE.ConeGeometry(.5,2.5+Math.random()*1.5,5),stoneM);
+    stal.position.set(p.x+(Math.random()-.5)*4,p.y+4.5,p.z+(Math.random()-.5)*3);
+    stal.rotation.z=Math.PI;scene.add(stal);
+  }
+
+  // Cave walls glow — ambient warm orange inside
+  const caveLight=new THREE.PointLight(0xFF5500,.6,60);
+  caveLight.position.set(-5,7,-68);scene.add(caveLight);
+
+  // Collision through tunnel
+  for(let i=0;i<=12;i++){
+    const p=tunCv.getPoint(i/12);
+    platforms.push({pos:new THREE.Vector3(p.x,p.y+.5,p.z),w:10,d:8,h:p.y+.5});
+  }
+})();
+
+// ══════════════════════════════════════════════════════
+// RING HELPER — declared here so it's available to all
+// building functions including Mysterious Ruins IIFE
+// ══════════════════════════════════════════════════════
+function mkRing(x,y,z){
+  const m=new THREE.Mesh(new THREE.TorusGeometry(.58,.15,7,14),rnM);
+  m.position.set(x,y,z);m.userData={collected:false,baseY:y};
+  scene.add(m);rObjs.push(m);
+}
+
+// ══════════════════════════════════════════════════════
+// MYSTERIOUS RUINS — rear mountain base, NW of volcano
+// Large mesa with ancient buildings, statues, stone blocks
+// Based on Wiikipedia: stone platforms, columns, serpent mouth
+// ══════════════════════════════════════════════════════
+
+// ══════════════════════════════════════════════════════
+// CASTLE STAIRCASE + SERPENT COVE
+// Stone stairs descend east of castle through rock face
+// into the underground Serpent Cove chamber.
+// ══════════════════════════════════════════════════════
+(function buildCastleCove(){
+  // Castle courtyard centre: x=-65, z=-115, y=21
+  const CX=-65,CY=21,CZ=-115;
+
+  // ── STONE STAIRCASE ──
+  const stepM=new THREE.MeshStandardMaterial({map:stoneTx,roughness:.88,metalness:.02,color:0xCCBBAA});
+  // Waypoints from courtyard east edge down through cliff to cove
+  const SW=[
+    [CX+26,CY+2,CZ],      [CX+34,CY-2,CZ-4],  [CX+40,CY-6,CZ-9],
+    [CX+46,CY-11,CZ-14],  [CX+50,CY-17,CZ-20],[CX+52,CY-22,CZ-26],
+    [CX+52,CY-27,CZ-31]   // cove floor level
+  ];
+  for(let i=0;i<SW.length-1;i++){
+    const [x1,y1,z1]=SW[i],[x2,y2,z2]=SW[i+1];
+    const dx=x2-x1,dz=z2-z1,dy=y2-y1,hl=Math.sqrt(dx*dx+dz*dz);
+    const ns=Math.max(4,Math.round(hl/1.8));
+    for(let s=0;s<ns;s++){
+      const t=(s+.5)/ns,sx=x1+dx*t,sy=y1+dy*t,sz=z1+dz*t;
+      const step=new THREE.Mesh(new THREE.BoxGeometry(4,.5,2),stepM);
+      step.position.set(sx,sy,sz);
+      step.rotation.y=-Math.atan2(dz,dx)+Math.PI/2;
+      step.rotation.x=Math.atan2(dy,hl)*.5;
+      scene.add(step);
+      platforms.push({pos:new THREE.Vector3(sx,sy,sz),w:4.5,d:2.5,h:sy+.25});
+    }
+    // Rock walls on both sides of staircase
+    const rn=new THREE.Vector3(-dz,0,dx).normalize();
+    for(const side of[-1,1]){
+      const w=new THREE.Mesh(new THREE.BoxGeometry(2.5,5,hl+.5),volcM);
+      w.position.set((x1+x2)/2+rn.x*side*3.5,(y1+y2)/2+2,(z1+z2)/2+rn.z*side*3.5);
+      w.rotation.y=-Math.atan2(dz,dx)+Math.PI/2;scene.add(w);
+    }
+  }
+  // Rock arch over stair entrance
+  const archR=new THREE.Mesh(new THREE.TorusGeometry(4,2.4,7,12,Math.PI),volcM);
+  archR.position.set(CX+30,CY+3,CZ-1);archR.rotation.z=Math.PI/2;archR.rotation.y=-.5;scene.add(archR);
+
+  // ── SERPENT COVE CHAMBER ──
+  const CCX=CX+52,CCY=CY-27,CCZ=CZ-31;
+  const caveM=new THREE.MeshStandardMaterial({map:volcTx,roughness:.95,metalness:.02,color:0x221A14,side:THREE.BackSide});
+  const floorM2=new THREE.MeshStandardMaterial({map:stoneTx,roughness:.96,color:0x3A2C24});
+
+  // Main cave sphere (interior walls)
+  scene.add(new THREE.Mesh(new THREE.SphereGeometry(24,16,12),caveM)).position.set(CCX,CCY,CCZ);
+  const caveMesh=scene.children[scene.children.length-1];caveMesh.position.set(CCX,CCY,CCZ);
+
+  // Floor
+  const floor=new THREE.Mesh(new THREE.CylinderGeometry(22,22,2,18),floorM2);
+  floor.position.set(CCX,CCY-10,CCZ);scene.add(floor);
+  platforms.push({pos:new THREE.Vector3(CCX,CCY-10,CCZ),w:44,d:44,h:CCY-10+.5});
+
+  // Rock shelf stepping stones from stair base to cove centre
+  const lastStair=SW[SW.length-1];
+  for(let i=0;i<6;i++){
+    const t=(i+.5)/6;
+    const sx=lastStair[0]+t*(CCX-lastStair[0]);
+    const sy=lastStair[1]+t*(CCY-10-lastStair[1]);
+    const sz=lastStair[2]+t*(CCZ-lastStair[2]);
+    const shelf=new THREE.Mesh(new THREE.BoxGeometry(4.5,.55+Math.random()*.4,3.5),stepM);
+    shelf.position.set(sx,sy,sz);shelf.rotation.y=Math.random()*.4;scene.add(shelf);
+    platforms.push({pos:new THREE.Vector3(sx,sy,sz),w:5,d:4,h:sy+.3});
+  }
+
+  // Water pool - eerie dark seawater inlet
+  const pool=new THREE.Mesh(new THREE.CylinderGeometry(14,14,.6,18),
+    new THREE.MeshStandardMaterial({color:0x003355,transparent:true,opacity:.86,roughness:.03,metalness:.25}));
+  pool.position.set(CCX,CCY-9.6,CCZ+5);scene.add(pool);
+
+  // Eerie lighting
+  const l1=new THREE.PointLight(0x0088BB,2.5,55);l1.position.set(CCX,CCY-5,CCZ);scene.add(l1);
+  const l2=new THREE.PointLight(0x00FF88,1.0,38);l2.position.set(CCX+9,CCY-8,CCZ+9);scene.add(l2);
+  const l3=new THREE.PointLight(0x004466,.8,30);l3.position.set(CCX-8,CCY-7,CCZ-8);scene.add(l3);
+
+  // Stalactites from ceiling
+  for(let i=0;i<14;i++){
+    const a=(i/14)*Math.PI*2,r=4+Math.random()*10;
+    const st=new THREE.Mesh(new THREE.ConeGeometry(.4+Math.random()*.5,2.5+Math.random()*4,6),floorM2);
+    st.position.set(CCX+Math.cos(a)*r,CCY+11,CCZ+Math.sin(a)*r);st.rotation.z=Math.PI;scene.add(st);
+  }
+  // Stalagmites from floor
+  for(let i=0;i<9;i++){
+    const a=(i/9)*Math.PI*2+.3,r=5+Math.random()*8;
+    const sm=new THREE.Mesh(new THREE.ConeGeometry(.35+Math.random()*.4,1.8+Math.random()*2.5,6),floorM2);
+    sm.position.set(CCX+Math.cos(a)*r,CCY-10,CCZ+Math.sin(a)*r);scene.add(sm);
+  }
+
+  // Ancient inscriptions on cave walls
+  const inscM=new THREE.MeshStandardMaterial({color:0x22AA55,emissive:0x115522,emissiveIntensity:.6,roughness:.88});
+  for(let i=0;i<6;i++){
+    const a=(i/6)*Math.PI*2;
+    const insc=new THREE.Mesh(new THREE.PlaneGeometry(3.5,2.2),inscM);
+    insc.position.set(CCX+Math.cos(a)*21.5,CCY,CCZ+Math.sin(a)*21.5);
+    insc.rotation.y=-a;scene.add(insc);
+  }
+  // Glowing runes
+  for(let i=0;i<4;i++){
+    const a=(i/4)*Math.PI*2+.4;
+    const gl=new THREE.PointLight(0x00FF55,.4,15);
+    gl.position.set(CCX+Math.cos(a)*20,CCY,CCZ+Math.sin(a)*20);scene.add(gl);
+  }
+
+  // Ancient pot / treasure
+  const potM=new THREE.MeshStandardMaterial({color:0x885522,roughness:.82,metalness:.12});
+  for(let i=0;i<4;i++){
+    const a=(i/4)*Math.PI*2+.7,r=8+Math.random()*5;
+    const pot=new THREE.Mesh(new THREE.SphereGeometry(.8+Math.random()*.4,8,7),potM);
+    pot.position.set(CCX+Math.cos(a)*r,CCY-9.5,CCZ+Math.sin(a)*r);
+    pot.scale.y=1.3;scene.add(pot);
+    // Gold coins spilling out
+    const coinM2=new THREE.MeshStandardMaterial({color:0xFFCC00,roughness:.15,metalness:.9,emissive:0xCC8800,emissiveIntensity:.4});
+    for(let c=0;c<4;c++){
+      const coin=new THREE.Mesh(new THREE.CylinderGeometry(.35,.35,.06,10),coinM2);
+      coin.position.set(CCX+Math.cos(a)*r+(Math.random()-.5),CCY-9.5+c*.07,CCZ+Math.sin(a)*r+(Math.random()-.5));
+      coin.rotation.set((Math.random()-.5)*.3,Math.random()*Math.PI,0);scene.add(coin);
+    }
+  }
+
+  // ── SERPENT'S MOUTH TUNNEL — connects cove to cliff face ──
+  const sEnd=new THREE.Vector3(CCX+7,CCY-9,CCZ+38);
+  const serpPts=[
+    new THREE.Vector3(CCX,CCY-9,CCZ+14),
+    new THREE.Vector3(CCX+4,CCY-9.5,CCZ+26),
+    sEnd
+  ];
+  const serpCv=new THREE.CatmullRomCurve3(serpPts);
+  scene.add(new THREE.Mesh(new THREE.TubeGeometry(serpCv,12,5,8,false),caveM));
+  for(let i=0;i<=10;i++){const p=serpCv.getPoint(i/10);platforms.push({pos:new THREE.Vector3(p.x,p.y+.5,p.z),w:9,d:6,h:p.y+.5});}
+
+  // Serpent's Mouth opening on cliff — arch + fangs
+  const smArch=new THREE.Mesh(new THREE.TorusGeometry(6.5,3.2,7,14,Math.PI),volcM);
+  smArch.position.set(sEnd.x,sEnd.y+5.5,sEnd.z);smArch.rotation.y=Math.PI/2;scene.add(smArch);
+  [-3,-1.2,0,1.2,3].forEach(fx=>{
+    const fang=new THREE.Mesh(new THREE.ConeGeometry(.55,2.8,5),volcM);
+    fang.position.set(sEnd.x+fx,sEnd.y+2.2,sEnd.z);fang.rotation.z=Math.PI;scene.add(fang);
+  });
+  // Lower jaw fangs
+  [-2.2,0,2.2].forEach(fx=>{
+    const fang=new THREE.Mesh(new THREE.ConeGeometry(.45,2.2,5),volcM);
+    fang.position.set(sEnd.x+fx,sEnd.y-.5,sEnd.z);scene.add(fang);
+  });
+  const smGl=new THREE.PointLight(0x00FF66,1.5,35);smGl.position.set(sEnd.x,sEnd.y+3,sEnd.z);scene.add(smGl);
+  // Glowing serpent eye gems in arch
+  const eyeGem=new THREE.MeshStandardMaterial({color:0xFF2200,emissive:0xFF0000,emissiveIntensity:1.2,roughness:.05,metalness:.5});
+  [-3.5,3.5].forEach(ex=>{
+    const eye=new THREE.Mesh(new THREE.SphereGeometry(.6,7,6),eyeGem);
+    eye.position.set(sEnd.x+ex,sEnd.y+7,sEnd.z+.5);scene.add(eye);
+    const el=new THREE.PointLight(0xFF2200,.8,18);el.position.copy(eye.position);scene.add(el);
+  });
+
+  ZONES.push({name:'Castle Cove',cx:CCX,cz:CCZ,r:28});
+  ZONES.push({name:"Serpent's Mouth",cx:sEnd.x,cz:sEnd.z,r:20});
+})();
+
+function mkRing(x,y,z){
+  const m=new THREE.Mesh(new THREE.TorusGeometry(.58,.15,7,14),rnM);
+  m.position.set(x,y,z);m.userData={collected:false,baseY:y};
+  scene.add(m);rObjs.push(m);
+}
+
+// ══════════════════════════════════════════════════════
+// MYSTERIOUS RUINS — rear mountain base, NW of volcano
+// Large mesa with ancient buildings, statues, stone blocks
+// Based on Wiikipedia: stone platforms, columns, serpent mouth
+// ══════════════════════════════════════════════════════
+(function buildMysteriousRuins(){
+  const ruinM2=new THREE.MeshStandardMaterial({map:stoneTx,roughness:0.9,metalness:0.02,color:0xA89878});
+  const mossM=new THREE.MeshStandardMaterial({map:stoneTx,roughness:0.92,metalness:0.01,color:0x7A8855});// moss-covered
+  const ancientM=new THREE.MeshStandardMaterial({map:castleTx,roughness:0.88,metalness:0.02,color:0xC8B890});
+
+  // ── MESA BASE ──
+  // Large elevated stone plateau at rear of island
+  const mesa=new THREE.Mesh(new THREE.CylinderGeometry(75,90,18,20),ruinM2);
+  mesa.position.set(-85,3,-145);mesa.castShadow=true;scene.add(mesa);
+  platforms.push({pos:new THREE.Vector3(-85,12,-145),w:148,d:148,h:12});
+
+  // Mesa top surface (grass/dirt)
+  const mesaTop=new THREE.Mesh(new THREE.CylinderGeometry(73,73,1.5,20),new THREE.MeshStandardMaterial({map:sandTx,roughness:0.92,color:0xC8A868}));
+  mesaTop.position.set(-85,12.8,-145);scene.add(mesaTop);
+
+  // Dirt path UP to the ruins — "Entrance to the Mysterious Ruins"
+  const entrancePts=[
+    new THREE.Vector3(-85,4,-95),
+    new THREE.Vector3(-86,6,-110),
+    new THREE.Vector3(-87,9,-125),
+    new THREE.Vector3(-86,12,-140),
+    new THREE.Vector3(-85,13,-155),
+  ];
+  const entrCv=new THREE.CatmullRomCurve3(entrancePts);
+  const entrSh=new THREE.Shape();entrSh.moveTo(-3,0);entrSh.lineTo(3,0);entrSh.lineTo(3,.4);entrSh.lineTo(-3,.4);entrSh.closePath();
+  scene.add(new THREE.Mesh(new THREE.ExtrudeGeometry(entrSh,{steps:18,bevelEnabled:false,extrudePath:entrCv}),
+    new THREE.MeshStandardMaterial({map:sandTx,roughness:0.92,color:0xCCAA66})));
+  for(let i=0;i<=8;i++){const p=entrCv.getPoint(i/8);platforms.push({pos:new THREE.Vector3(p.x,p.y+.5,p.z),w:8,d:5,h:p.y+.5});}
+
+  // ── MAIN RUIN COMPLEX ──
+  // Central temple structure — largest building
+  (function(){
+    const g=new THREE.Group();
+    // Stepped pyramid base
+    [[28,4.5,22],[22,3,17],[16,3,12],[10,3,7]].forEach(([w2,h2,d2],i)=>{
+      const step=new THREE.Mesh(new THREE.BoxGeometry(w2,h2,d2),ancientM);
+      step.position.y=i*3+h2/2;g.add(step);
+    });
+    // Temple walls on top
+    const walls=new THREE.Mesh(new THREE.BoxGeometry(9,8,6),ancientM);walls.position.y=20;g.add(walls);
+    // Roof
+    const rf=new THREE.Mesh(new THREE.ConeGeometry(7.5,5,4),ruinM2);rf.position.y=27;rf.rotation.y=Math.PI/4;g.add(rf);
+    // Entrance columns
+    for(const cx of[-3.5,3.5]){
+      const col=new THREE.Mesh(new THREE.CylinderGeometry(.7,.9,8,8),ancientM);col.position.set(cx,16,3.2);g.add(col);
+      const cap=new THREE.Mesh(new THREE.BoxGeometry(2.2,1,2.2),ancientM);cap.position.set(cx,20.5,3.2);g.add(cap);
+    }
+    // Doorway (dark opening)
+    const door=new THREE.Mesh(new THREE.BoxGeometry(3,5.5,1),new THREE.MeshStandardMaterial({color:0x111111,roughness:1}));
+    door.position.set(0,17.8,3.15);g.add(door);
+    g.position.set(-85,12,-160);scene.add(g);
+    platforms.push({pos:new THREE.Vector3(-85,31,-160),w:30,d:24,h:31});
+  })();
+
+  // ── STONE COLUMNS — two rows flanking path ──
+  [[-70,-130],[-72,-140],[-74,-150],[-76,-160],[-76,-170],
+   [-100,-130],[-98,-140],[-96,-150],[-94,-160],[-94,-170]].forEach(([cx,cz],i)=>{
+    const height=8+Math.random()*5;
+    const broken=Math.random()>.55;// some are toppled
+    const col=new THREE.Mesh(new THREE.CylinderGeometry(.9,1.1,height,9),ancientM);
+    col.position.set(cx,12+height/2,cz);
+    if(broken){col.rotation.z=(Math.random()-.5)*.8;col.position.y=12+2;}
+    col.castShadow=true;scene.add(col);
+    if(!broken){
+      const cap=new THREE.Mesh(new THREE.BoxGeometry(2.6,1.2,2.6),ancientM);
+      cap.position.set(cx,12+height+.6,cz);scene.add(cap);
+    }
+  });
+
+  // ── ANCIENT STATUES — serpent/idol figures ──
+  function mkStatue(x,y,z,ry,style){
+    const g=new THREE.Group();
+    const base=new THREE.Mesh(new THREE.BoxGeometry(3,1.5,3),ruinM2);base.position.y=.75;g.add(base);
+    if(style===0){
+      // Serpent head idol
+      const body=new THREE.Mesh(new THREE.CylinderGeometry(.6,1,5,8),mossM);body.position.y=4;g.add(body);
+      const head=new THREE.Mesh(new THREE.SphereGeometry(1.2,8,6),mossM);head.position.y=7.5;head.scale.set(1,.7,1.3);g.add(head);
+      // Fangs
+      for(const fx of[-.4,.4]){
+        const fang=new THREE.Mesh(new THREE.ConeGeometry(.2,.8,4),ruinM2);fang.position.set(fx,6.8,.9);fang.rotation.x=.4;g.add(fang);
+      }
+      // Eye gems
+      const eyeM2=new THREE.MeshStandardMaterial({color:0x00FF88,emissive:0x00AA44,emissiveIntensity:0.6,roughness:0.1,metalness:0.5});
+      for(const ex of[-.4,.4]){
+        const eye=new THREE.Mesh(new THREE.SphereGeometry(.18,5,5),eyeM2);eye.position.set(ex,7.7,.95);g.add(eye);
+      }
+    } else if(style===1){
+      // Stone warrior figure
+      const torso=new THREE.Mesh(new THREE.BoxGeometry(2.2,3.5,1.4),ancientM);torso.position.y=4.2;g.add(torso);
+      const head2=new THREE.Mesh(new THREE.BoxGeometry(1.6,1.8,1.4),ancientM);head2.position.y=7.2;g.add(head2);
+      // Helmet crest
+      const crest=new THREE.Mesh(new THREE.BoxGeometry(.5,1.4,.5),ruinM2);crest.position.y=8.5;g.add(crest);
+      // Arms raised
+      for(const ax2 of[-1.5,1.5]){
+        const arm=new THREE.Mesh(new THREE.CylinderGeometry(.4,.5,2.5,6),ancientM);
+        arm.position.set(ax2,5.5,0);arm.rotation.z=ax2>0?-.5:.5;g.add(arm);
+      }
+    } else {
+      // Obelisk
+      const shaft=new THREE.Mesh(new THREE.BoxGeometry(1.8,8,1.8),ancientM);shaft.position.y=5;g.add(shaft);
+      const tip=new THREE.Mesh(new THREE.ConeGeometry(1.3,2.5,4),ruinM2);tip.position.y=10.5;tip.rotation.y=Math.PI/4;g.add(tip);
+      // Carved glyphs (flat quads with dark colour)
+      for(let gi=0;gi<3;gi++){
+        const glyph=new THREE.Mesh(new THREE.PlaneGeometry(1.2,.5),new THREE.MeshStandardMaterial({color:0x554433,roughness:0.9}));
+        glyph.position.set(0,2+gi*2,.92);g.add(glyph);
+      }
+    }
+    g.position.set(x,y,z);g.rotation.y=ry||0;scene.add(g);
+  }
+  // Place statues around the ruins
+  mkStatue(-68,12,-148,.8,0); // serpent
+  mkStatue(-102,12,-148,-.8,0);// serpent mirror
+  mkStatue(-75,12,-165,.3,1); // warrior
+  mkStatue(-95,12,-165,-.3,1);// warrior mirror
+  mkStatue(-62,12,-158,.5,2); // obelisk
+  mkStatue(-108,12,-158,-.5,2);// obelisk
+  mkStatue(-85,12,-175,0,2);   // centre obelisk
+
+  // ── STONE BLOCKS — scattered ancient debris ──
+  [[-.68,-130,2.5,0.3],[-.72,-155,2,0.8],[-.90,-135,3,.1],[-.78,-168,2.2,.5],
+   [-.65,-145,1.8,.9],[-.100,-148,2.8,.2],[-.95,-165,2,.6],[-.75,-172,1.5,.4]].map(([rx,rz,s,ry])=>{
+    const bx=-85+rx*10,bz=rz;
+    const block=new THREE.Mesh(new THREE.BoxGeometry(s*1.8,s,s*1.5),ruinM2);
+    block.position.set(bx,12+s*.5,bz);
+    block.rotation.set(ry*.2,ry*Math.PI,0);block.castShadow=true;scene.add(block);
+  });
+
+  // ── CLIFFSIDE RUINS — rocky spire with stone platform ──
+  const spire=new THREE.Mesh(new THREE.CylinderGeometry(5,12,30,9),volcM);
+  spire.position.set(-50,0,-155);spire.castShadow=true;scene.add(spire);
+  const spirePlat=new THREE.Mesh(new THREE.CylinderGeometry(8,8,1.5,10),ruinM2);
+  spirePlat.position.set(-50,30,-155);scene.add(spirePlat);
+  platforms.push({pos:new THREE.Vector3(-50,31,-155),w:16,d:16,h:31});
+  // Rings on spire top
+  for(let i=0;i<5;i++){const a=(i/5)*Math.PI*2;
+    const r=new THREE.Mesh(new THREE.TorusGeometry(.58,.15,7,14),rnM);
+    r.position.set(-50+Math.cos(a)*4,34,-155+Math.sin(a)*4);r.userData={collected:false,baseY:34};
+    scene.add(r);rObjs.push(r);
+  }
+
+  // ── THE PIT — mysterious hole in the ruins ──
+  const pitRim=new THREE.Mesh(new THREE.TorusGeometry(4,1.2,8,16),ruinM2);
+  pitRim.rotation.x=Math.PI/2;pitRim.position.set(-85,13,-180);scene.add(pitRim);
+  const pitDark=new THREE.Mesh(new THREE.CylinderGeometry(3.8,3.8,2,14,1,true),
+    new THREE.MeshStandardMaterial({color:0x050505,roughness:1,side:THREE.BackSide}));
+  pitDark.position.set(-85,12,-180);scene.add(pitDark);
+  // Pit warning sign
+  const warnSign=new THREE.Mesh(new THREE.PlaneGeometry(3,1.5),
+    new THREE.MeshStandardMaterial({color:0xFF8800,roughness:0.7,side:THREE.DoubleSide}));
+  warnSign.position.set(-85,15,-176);scene.add(warnSign);
+
+  // ── SERPENT'S MOUTH — cliff face at bottom of mesa toward ocean ──
+  const smBase=new THREE.Mesh(new THREE.CylinderGeometry(10,14,8,12),volcM);
+  smBase.position.set(-90,-2,-195);scene.add(smBase);
+  const smArch=new THREE.Mesh(new THREE.TorusGeometry(6,3,7,14,Math.PI),volcM);
+  smArch.rotation.y=Math.PI/2;smArch.position.set(-90,6,-195);scene.add(smArch);
+  const smTeeth=[];
+  for(let i=0;i<5;i++){
+    const tooth=new THREE.Mesh(new THREE.ConeGeometry(1,3,5),volcM);
+    tooth.position.set(-90+(-2+i)*2.5,3,-195.5);tooth.rotation.z=Math.PI;scene.add(tooth);
+    smTeeth.push(tooth);
+  }
+  // Eerie green glow inside serpent's mouth
+  const smGl=new THREE.PointLight(0x00FF66,.8,25);smGl.position.set(-90,4,-192);scene.add(smGl);
+
+  // ── ANCIENT COINS decorating the ruins (collectable rings) ──
+  // These are the "piles of ancient coins" — golden ring clusters
+  // (handled in the main ring placement below)
+
+  // ── SOUTHERN CRUDE MONOLITHS — the stone-age tribal civilization ──
+  // These are "huge, crude, half-destroyed" compared to the northern ruins
+  // Located on south face of the mesa, partially toppled
+  const monoM=new THREE.MeshStandardMaterial({map:stoneTx,roughness:0.95,metalness:0.0,color:0x887766});
+  [['-72','-120',12,true],['-78','-112',10,false],['-84','-108',14,true],['-90','-112',9,true],
+   ['-96','-118',11,false],['-102','-122',8,true],['-88','-128',13,false]].forEach(([x,z,h,fallen])=>{
+    const mono=new THREE.Mesh(new THREE.BoxGeometry(3.5,h,2.2),monoM);
+    mono.position.set(+x,12+h/2,+z);
+    if(fallen){
+      // Toppled over — lying on ground at angle
+      mono.rotation.z=(Math.random()>.5?1:-1)*(Math.PI/2+Math.random()*.3);
+      mono.position.y=12+1.5;
+    }
+    mono.castShadow=true;scene.add(mono);
+    // Crude carved markings (dark patches)
+    if(!fallen){
+      const glyph=new THREE.Mesh(new THREE.PlaneGeometry(1.5,1),
+        new THREE.MeshStandardMaterial({color:0x332211,roughness:0.98}));
+      glyph.position.set(+x,12+h*.6,+z+1.12);scene.add(glyph);
+    }
+  });
+
+  // ── ANCIENT COIN PILES — "archaeologists discovered piles of ancient coins" ──
+  function mkCoinPile(x,y,z){
+    // Stack of 5-8 glowing coin discs
+    const coinM3=new THREE.MeshStandardMaterial({color:0xFFCC00,roughness:0.2,metalness:0.8,emissive:0xCC8800,emissiveIntensity:0.4});
+    const n=5+Math.floor(Math.random()*4);
+    for(let i=0;i<n;i++){
+      const coin=new THREE.Mesh(new THREE.CylinderGeometry(.4,.4,.06,12),coinM3);
+      coin.position.set(x+(Math.random()-.5)*.4,y+i*.07,z+(Math.random()-.5)*.4);
+      coin.rotation.set((Math.random()-.5)*.2,Math.random()*Math.PI,(Math.random()-.5)*.15);
+      scene.add(coin);
+    }
+    // Coin glow
+    const cgl=new THREE.PointLight(0xFFCC00,.6,12);cgl.position.set(x,y+.5,z);scene.add(cgl);
+  }
+  mkCoinPile(-78,13,-150);mkCoinPile(-92,13,-158);mkCoinPile(-100,13,-145);
+  mkCoinPile(-68,13,-162);mkCoinPile(-110,13,-152);
+
+  // ── ANCIENT SPEAR RACKS — "spear-like weapons" in the ruins ──
+  [['-80','-148'],['-90','-155'],['-76','-162']].forEach(([x,z])=>{
+    const rack=new THREE.Group();
+    const base=new THREE.Mesh(new THREE.CylinderGeometry(.3,.4,.5,6),
+      new THREE.MeshStandardMaterial({map:stoneTx,roughness:0.9}));
+    rack.add(base);
+    for(let i=0;i<3;i++){
+      const shaft=new THREE.Mesh(new THREE.CylinderGeometry(.06,.08,4.5,5),darkWoodM);
+      shaft.position.set(-0.4+i*.4,.25+2.25,0);rack.add(shaft);
+      const tip=new THREE.Mesh(new THREE.ConeGeometry(.18,.8,4),metalM);
+      tip.position.set(-0.4+i*.4,.25+4.5+.4,0);rack.add(tip);
+    }
+    rack.position.set(+x,13,+z);scene.add(rack);
+  });
+
+  // ── SCRIPTURE WALL — carved text/glyphs on a standing stone ──
+  (function(){
+    const wall=new THREE.Mesh(new THREE.BoxGeometry(10,8,1.2),
+      new THREE.MeshStandardMaterial({map:stoneTx,roughness:0.9,color:0xA89870}));
+    wall.position.set(-85,17,-175);wall.castShadow=true;scene.add(wall);
+    // Glyph rows (dark rectangles simulating carved text)
+    for(let row=0;row<4;row++)for(let col=0;col<5;col++){
+      const glyph=new THREE.Mesh(new THREE.PlaneGeometry(.9,.5),
+        new THREE.MeshStandardMaterial({color:0x332200,roughness:0.95}));
+      glyph.position.set(-85-3.5+col*1.8,14+row*1.5+1.2,-174.4);scene.add(glyph);
+    }
+  })();
+
+  // ── UNDERGROUND CAVERN — below the ruins pit ──
+  // "Secret tunnels and caverns inside the island"
+  // Accessible via the Pit — player drops in and explores below
+  (function(){
+    const cavM=new THREE.MeshStandardMaterial({map:volcTx,roughness:0.95,metalness:0.02,color:0x332820,side:THREE.BackSide});
+    const cavFloorM=new THREE.MeshStandardMaterial({map:stoneTx,roughness:0.95,color:0x443830});
+
+    // Main cavern chamber
+    const cavern=new THREE.Mesh(new THREE.SphereGeometry(18,14,10),cavM);
+    cavern.position.set(-85,0,-165);scene.add(cavern);
+    // Floor
+    const cavFloor=new THREE.Mesh(new THREE.CylinderGeometry(17,17,1.5,16),cavFloorM);
+    cavFloor.position.set(-85,2,-165);scene.add(cavFloor);
+    platforms.push({pos:new THREE.Vector3(-85,3,-165),w:34,d:34,h:3});
+
+    // Stalagmites on floor
+    for(let i=0;i<10;i++){
+      const a=(i/10)*Math.PI*2,r=6+Math.random()*9;
+      const s=new THREE.Mesh(new THREE.ConeGeometry(.5+Math.random()*.6,3+Math.random()*3,6),stoneM);
+      s.position.set(-85+Math.cos(a)*r,3.5,-165+Math.sin(a)*r);scene.add(s);
+    }
+    // Stalactites from ceiling
+    for(let i=0;i<8;i++){
+      const a=(i/8)*Math.PI*2,r=4+Math.random()*8;
+      const s=new THREE.Mesh(new THREE.ConeGeometry(.4+Math.random()*.5,2+Math.random()*3,6),stoneM);
+      s.position.set(-85+Math.cos(a)*r,16,-165+Math.sin(a)*r);s.rotation.z=Math.PI;scene.add(s);
+    }
+    // Cavern light — eerie green/blue
+    const cavLight=new THREE.PointLight(0x00FF88,1.5,35);cavLight.position.set(-85,8,-165);scene.add(cavLight);
+    const cavLight2=new THREE.PointLight(0x4488FF,.8,25);cavLight2.position.set(-85,5,-155);scene.add(cavLight2);
+
+    // Sea Serpent Cavern tunnel — connects to Serpent's Mouth at coast
+    const serpPts=[
+      new THREE.Vector3(-85,3,-165),
+      new THREE.Vector3(-88,2,-175),
+      new THREE.Vector3(-90,1,-185),
+      new THREE.Vector3(-90,0,-195),
+    ];
+    const serpCv=new THREE.CatmullRomCurve3(serpPts);
+    const serpGeo=new THREE.TubeGeometry(serpCv,12,4,8,false);
+    scene.add(new THREE.Mesh(serpGeo,cavM));
+    // Platforms in serpent tunnel
+    for(let i=0;i<=8;i++){
+      const p=serpCv.getPoint(i/8);
+      platforms.push({pos:new THREE.Vector3(p.x,p.y+.5,p.z),w:7,d:6,h:p.y+.5});
+    }
+    // Serpent eye lights
+    const serpEye1=new THREE.PointLight(0xFF0000,.8,18);serpEye1.position.set(-90,4,-188);scene.add(serpEye1);
+    const serpEye2=new THREE.PointLight(0x00FF44,.6,18);serpEye2.position.set(-88,4,-178);scene.add(serpEye2);
+
+    // Ancient wall inscriptions inside cavern
+    const inscM=new THREE.MeshStandardMaterial({color:0x228844,emissive:0x115522,emissiveIntensity:0.4,roughness:0.9});
+    for(let i=0;i<5;i++){
+      const a=(i/5)*Math.PI*2;
+      const insc=new THREE.Mesh(new THREE.PlaneGeometry(3,2),inscM);
+      insc.position.set(-85+Math.cos(a)*17,7,-165+Math.sin(a)*17);
+      insc.rotation.y=-a;scene.add(insc);
+    }
+
+    // Pit shaft connecting ruins above to cavern below
+    const shaft=new THREE.Mesh(new THREE.CylinderGeometry(3.5,4,14,12,1,true),cavM);
+    shaft.position.set(-85,8.5,-180);scene.add(shaft);
+    // Rings inside shaft (collectible as you drop in)
+    for(let i=0;i<4;i++)mkRing(-85,13-i*2.5,-180);
+
+    ZONES.push({name:'Underground Cavern',cx:-85,cz:-165,r:25});
+    ZONES.push({name:"Sea Serpent Cavern",cx:-90,cz:-185,r:18});
+  })();
+
+  // ── CASTLE INTERIOR PLATFORMS — let player walk inside ──
+  // Ground floor of castle courtyard
+  platforms.push({pos:new THREE.Vector3(-65,23,-115),w:46,d:38,h:23});
+  // Tower platforms — each tower has three floor levels
+  [[-87,-131],[-87,-99],[-43,-131],[-43,-99]].forEach(([tx,tz])=>{
+    for(let floor=0;floor<3;floor++){
+      platforms.push({pos:new THREE.Vector3(tx,23+floor*8,tz),w:9,d:9,h:23+floor*8});
+    }
+  });
+  // Battlements walkway connecting towers
+  platforms.push({pos:new THREE.Vector3(-65,27,-131),w:46,d:5,h:27});
+  platforms.push({pos:new THREE.Vector3(-65,27,-99),w:46,d:5,h:27});
+  platforms.push({pos:new THREE.Vector3(-87,27,-115),w:5,d:34,h:27});
+  platforms.push({pos:new THREE.Vector3(-43,27,-115),w:5,d:34,h:27});
+
+  // Zone extension
+  ZONES.push({name:'Mysterious Ruins',cx:-85,cz:-145,r:75});
+  ZONES.push({name:"Serpent's Mouth",cx:-90,cz:-195,r:30});
+})();
+
+// ══════════════════════════════════════════════════════
+// GUIDED RING PATH — follows the route:
+// Dock → Town → Bridge → Loop Road → Tunnel →
+// Ruins → Ruins Mesa → Volcano → Castle → back
+//
+// Rings are spaced ~6 units apart along each segment
+// so the player always has a clear trail to follow
+// ══════════════════════════════════════════════════════
+// Helper: place rings evenly along a curve
+function ringsAlongCurve(pts,yOff,spacing){
+  yOff=yOff||1.8;spacing=spacing||7;
+  const cv=new THREE.CatmullRomCurve3(pts.map(p=>new THREE.Vector3(...p)));
+  const len=cv.getLength();
+  const n=Math.max(2,Math.floor(len/spacing));
+  for(let i=0;i<=n;i++){
+    const p=cv.getPoint(i/n);
+    mkRing(p.x,p.y+yOff,p.z);
+  }
+}
+
+// ══════════════════════════════════════════════════════
+// GUIDED RING PATH — full verified Wuhu Island circuit
+// All XYZ coordinates match actual geometry positions.
+// Bridge rings use the stored BRIDGE_CV curve.
+// Volcano rings use inline volcH() formula.
+// ══════════════════════════════════════════════════════
+
+// Inline height helpers (avoid calling getTerrainHeight before it's declared)
+function _hillH(x,z){
+  let h=3.5;
+  const d1=Math.sqrt(x*x+(z-30)*(z-30));if(d1<80)h=Math.max(h,3.5+(1-d1/80)*5.5);
+  const d2=Math.sqrt(x*x+z*z);if(d2<65)h=Math.max(h,9+(1-d2/65)*9.5);
+  const d3=Math.sqrt((x+12)*(x+12)+(z+25)*(z+25));if(d3<45)h=Math.max(h,18.5+(1-d3/45)*8);
+  const d4=Math.sqrt((x+15)*(x+15)+(z+45)*(z+45));if(d4<38)h=Math.max(h,23+(1-d4/38)*6);
+  return h;
+}
+function _volcH(x,z){
+  const dv=Math.sqrt((x+14)*(x+14)+(z+72)*(z+72));
+  if(dv<30)return 63+(1-dv/30)*22;if(dv<48)return 46+(1-dv/48)*17;
+  if(dv<66)return 31+(1-dv/66)*15;if(dv<88)return 18+(1-dv/88)*13;
+  if(dv<112)return 3.5+(1-dv/112)*14.5;return 3.5;
+}
+function _egH(x,z){const d=Math.sqrt((x+72)*(x+72)+(z+55)*(z+55));return d<65?3.5+(1-d/65)*12:3.5;}
+function _ruinH(x,z){const d=Math.sqrt((x+85)*(x+85)+(z+145)*(z+145));return d<75?12.5:d<90?3.5+(1-d/90)*9.5:3.5;}
+
+// ─── 1. HARBOR DOCK START — pier → shore ───
+for(let i=0;i<8;i++) mkRing(102,5.8,58-i*3.5);        // along main pier
+for(let i=0;i<5;i++) mkRing(95-i*2,5.5,38+i*5);       // pier → land
+
+// ─── 2. HARBOR → BRIDGE WEST APPROACH ───
+ringsAlongCurve([[88,4.4,58],[80,4.3,68],[70,4.2,78],[60,4.2,86],[52,5.2,92]],1.8,7);
+
+// ─── 3. RED IRON BRIDGE — follow stored curve exactly ───
+{
+  const bc=window.BRIDGE_CV;
+  if(bc){
+    for(let i=0;i<=18;i++){
+      const p=bc.getPoint(i/18);
+      mkRing(p.x,p.y+2.0,p.z);
+    }
+  }
+}
+
+// ─── 4. BRIDGE EAST END → HARBOR ROAD → TOWN ───
+// Bridge east end: x=118,z=50 → town center x=30,z=118
+ringsAlongCurve([[118,4.5,50],[108,4.3,60],[95,4.2,72],[80,4.1,84],[65,4.1,96],[50,4.1,106],[35,4.1,114],[30,4.1,118]],1.8,7);
+
+// ─── 5. WUHU TOWN — fountain circuit + main street ───
+for(let i=0;i<8;i++){const a=(i/8)*Math.PI*2;mkRing(30+Math.cos(a)*7,5.8,118+Math.sin(a)*7);}
+for(let i=0;i<10;i++) mkRing(-30+i*7,5.4,114);        // east-west main road
+for(let i=0;i<6;i++)  mkRing(30,5.4,124+i*7);         // north toward hills
+// Town Hall approach
+mkRing(30,5.5,98);mkRing(30,5.5,95);mkRing(30,5.5,93);
+
+// ─── 6. TOWN → PROMENADE (south) ───
+ringsAlongCurve([[30,4.2,155],[10,4.2,162],[-20,4.2,166],[-52,4.2,168],[-82,4.2,168]],1.8,7);
+
+// ─── 7. PROMENADE boardwalk ───
+for(let i=0;i<24;i++) mkRing(-88+i*9,5.6,170);
+
+// ─── 8. PROMENADE → SWEET BEACH (SE) ───
+ringsAlongCurve([[-30,4.2,182],[10,4.2,198],[55,4.2,208],[102,4.2,214],[138,4.2,210]],1.8,7);
+
+// ─── 9. SWEET BEACH ───
+for(let i=0;i<12;i++) mkRing(88+i*6,5.4,218);
+// Beach volleyball arc
+for(let i=0;i<6;i++){const a=(i/5)*Math.PI;mkRing(155+Math.cos(a)*10,5.8+Math.sin(a)*5,188);}
+// Camel Rock
+mkRing(185,12.5,175);mkRing(181,16.5,175);mkRing(192,14.5,175);
+
+// ─── 10. EAST COAST — Sweet Beach → Cocoba Hotel → Lighthouse ───
+ringsAlongCurve([[158,4.5,182],[162,4.5,148],[165,4.5,105],[162,4.5,65],[155,4.5,28]],1.8,9);
+// Lighthouse climb
+for(let i=0;i<5;i++) mkRing(148+i*2,5.5+i*3.8,20);
+mkRing(168,9,15);mkRing(168,14,15);mkRing(168,20,15);mkRing(168,26,15);
+
+// ─── 11. HARBOR → NORTH ROAD ───
+// From harbor, take north road toward volcano (loop road heading N)
+ringsAlongCurve([[90,4.3,58],[88,4.5,40],[82,4.7,22],[75,5.2,5],[68,5.8,-12],[60,6.5,-28],[55,7.5,-42]],1.8,8);
+
+// ─── 12. VOLCANO TUNNEL — east entrance → west exit ───
+// East entrance ~x=55,z=-48  West exit ~x=-60,z=-58
+ringsAlongCurve([[55,8,-48],[38,9,-57],[18,9.8,-65],[0,10,-68],[-20,9.8,-66],[-42,9,-60],[-60,7.5,-57]],1.8,6);
+
+// ─── 13. TUNNEL EXIT → FOREST APPROACH ───
+ringsAlongCurve([[-60,7,-57],[-68,8,-65],[-76,9.5,-74],[-82,11,-85],[-86,12,-96]],1.8,7);
+
+// ─── 14. RUINS ENTRANCE DIRT PATH ───
+ringsAlongCurve([[-86,4.5,-98],[-86,6.5,-110],[-86,9,-122],[-86,11.5,-134],[-85,13,-147],[-85,13.5,-160]],1.8,6);
+
+// ─── 15. MYSTERIOUS RUINS MESA ───
+// Outer circuit of the mesa
+for(let i=0;i<14;i++){const a=(i/14)*Math.PI*2;mkRing(-85+Math.cos(a)*38,14.8,-145+Math.sin(a)*38);}
+// West column row
+for(let i=0;i<8;i++) mkRing(-70-i*0.5,14.5,-133-i*4.2);
+// East column row
+for(let i=0;i<8;i++) mkRing(-100+i*0.5,14.5,-133-i*4.2);
+// Temple approach
+for(let i=0;i<5;i++) mkRing(-85,14.5,-162-i*4);
+// Cliffside spire jump arc
+for(let i=0;i<6;i++){const a=(i/5)*Math.PI;mkRing(-67+Math.cos(a)*12,14.5+Math.sin(a)*15,-155);}
+// Crude southern monoliths
+for(let i=0;i<6;i++) mkRing(-75-i*3.5,13.5,-118-i*1.5);
+
+// ─── 16. RUINS → SUMMERSTONE CASTLE ───
+ringsAlongCurve([[-85,13,-168],[-80,15,-176],[-74,17,-170],[-70,19,-158],[-67,21,-144],[-65,21,-130],[-65,21.5,-118]],1.8,7);
+
+// ─── 17. SUMMERSTONE CASTLE ───
+// Courtyard approach
+ringsAlongCurve([[-65,22,-115],[-65,22,-108],[-65,22,-100],[-65,22,-93]],2.2,6);
+// All four battlement walls
+for(let i=0;i<7;i++) mkRing(-87+i*7.4,29.5,-131);  // north wall
+for(let i=0;i<7;i++) mkRing(-87+i*7.4,29.5,-99);   // south wall
+for(let i=0;i<5;i++) mkRing(-87,29.5,-131+i*8);    // west wall
+for(let i=0;i<5;i++) mkRing(-43,29.5,-131+i*8);    // east wall
+// Tower tops (all four)
+[[-87,-131],[-87,-99],[-43,-131],[-43,-99]].forEach(([tx,tz])=>{
+  mkRing(tx,33,tz);mkRing(tx,38,tz);mkRing(tx,43,tz);
+});
+
+// ─── 18. CASTLE → DUCKLING LAKE ───
+ringsAlongCurve([[-65,21,-112],[-58,21.5,-108],[-52,21.8,-104],[-50,22.2,-100]],1.8,6);
+for(let i=0;i<10;i++){const a=(i/10)*Math.PI*2;mkRing(-50+Math.cos(a)*14,23.5,-100+Math.sin(a)*14);}
+
+// ─── 19. DUCKLING LAKE → SUMMERSTONE FALLS ───
+ringsAlongCurve([[-50,21,-100],[-46,19,-88],[-42,17,-72],[-38,15,-55],[-35,13.5,-38],[-35,13,-30]],1.8,7);
+// Waterfall arc
+for(let i=0;i<8;i++){const a=(i/7)*Math.PI;mkRing(-35+Math.cos(a)*5,5.5+Math.sin(a)*13.5,-29);}
+
+// ─── 20. RIVER PATH → FRONTAL MOUNTAIN BASE ───
+ringsAlongCurve([[-34,15,-30],[-26,13,-14],[-16,10,4],[-5,8,18],[5,7,32],[14,6.5,44],[20,5.5,54]],1.8,8);
+
+// ─── 21. FRONTAL HILLS — walk up the graduated slopes ───
+// Hill 1 → Hill 2 → Hill 3 → Hill 4 heading toward volcano
+{
+  const hillPts=[
+    [18,5.5,52],[12,7,38],[5,9,24],[-2,11.5,10],[-8,14,-5],
+    [-11,17,-20],[-13,20,-34],[-14,23,-46]
+  ];
+  hillPts.forEach(([x,y,z])=>mkRing(x,y+2,z));
+}
+
+// ─── 22. VOLCANO TRAIL — spiral up the mountain ───
+for(let i=0;i<=32;i++){
+  const t=i/32;
+  const a=t*Math.PI*4.5;      // 2.25 rotations
+  const r=105-t*80;
+  const rx=-14+Math.cos(a)*r, rz=-72+Math.sin(a)*r;
+  const ry=_volcH(rx,rz);
+  mkRing(rx,ry+2.2,rz);
+}
+// Crater rim
+for(let i=0;i<12;i++){const a=(i/12)*Math.PI*2;mkRing(-12+Math.cos(a)*14,86.5,-81+Math.sin(a)*14);}
+mkRing(-12,92,-81);mkRing(-12,97,-81); // above crater
+
+// ─── 23. VOLCANO → PIRATE'S EYE (west side of island) ───
+// Descend west slope of volcano → Pirate's Eye peninsula
+ringsAlongCurve([[-14,18,-72],[-28,14,-60],[-52,9,-50],[-78,6.5,-40],[-102,5.5,-22],[-128,5.2,-4],[-148,5.5,18]],1.8,9);
+// Pirate's Eye arch
+mkRing(-162,15,25);mkRing(-162,20,25);mkRing(-162,25,25);
+
+// ─── 24. WEST COAST — Pirate's Eye → Candle → promenade ───
+ringsAlongCurve([[-148,5,22],[-145,4.8,55],[-140,4.7,90],[-132,4.5,128],[-120,4.5,158],[-96,4.4,182]],1.8,9);
+// The Candle sea stack
+mkRing(-118,49,148);mkRing(-118,53,148);mkRing(-118,57,148);
+
+// ─── 25. UNDERGROUND CAVERN ───
+// Drop through The Pit
+for(let i=0;i<4;i++) mkRing(-85,13.5-i*3,-180);
+// Cavern floor circuit
+for(let i=0;i<8;i++){const a=(i/8)*Math.PI*2;mkRing(-85+Math.cos(a)*11,4.8,-165+Math.sin(a)*11);}
+// Serpent tunnel
+ringsAlongCurve([[-85,3,-165],[-88,2,-177],[-90,1,-188],[-90,1,-196]],1.8,5);
+
+// ─── 26. EVERGREEN GROVE ───
+[[-50,-40],[-60,-50],[-72,-55],[-82,-62],[-92,-68],[-100,-80]].forEach(([x,z])=>{
+  mkRing(x,_egH(x,z)+2.2,z);
+});
+
+// ─── 27. WIND ORCHARD ───
+for(let i=0;i<6;i++) mkRing(-25-i*6,5.5,60+i*2);
+mkRing(-35,15.5,62);mkRing(-50,15.8,68);mkRing(-22,15.2,58); // windmill tops
+
+// ─── 28. PRIVATE ISLAND ───
+for(let i=0;i<6;i++){const a=(i/6)*Math.PI*2;mkRing(-230+Math.cos(a)*12,4.8,60+Math.sin(a)*12);}
+
+// Total rings: ~320
+
+// ══════════════════════════════════════════════════════
+
+// ══════════════════════════════════════════════════════
+// CORRECTED RING PATH — verified against all geometry
+// Bridge now at WX=75,WZ=155 → EX=152,EZ=80
+// Golf trail runs x=25→-14, z=108→-50
+// Castle cove staircase: CX+26→CX+52, CY+2→CY-27
+// ══════════════════════════════════════════════════════
+function _vH(x,z){const d=Math.sqrt((x+14)*(x+14)+(z+72)*(z+72));if(d<30)return 63+(1-d/30)*22;if(d<48)return 46+(1-d/48)*17;if(d<66)return 31+(1-d/66)*15;if(d<88)return 18+(1-d/88)*13;return 3.5+(1-Math.min(1,d/112))*14.5;}
+
+// 1. HARBOR DOCK
+for(let i=0;i<8;i++)mkRing(106,5.8,58-i*3.5);
+for(let i=0;i<5;i++)mkRing(97-i*2,5.5,36+i*5);
+
+// 2. Harbor → bridge west approach (along beach road)
+ringsAlongCurve([[90,4.4,58],[82,4.3,72],[75,4.3,90],[72,4.4,108],[68,4.6,128],[68,5.2,148],[72,5.8,156]],1.8,8);
+
+// 3. RED IRON BRIDGE — follow bridge curve (WX=75,WZ=155 → EX=152,EZ=80)
+{const bc=window.BRIDGE_CV;if(bc){for(let i=0;i<=18;i++){const p=bc.getPoint(i/18);mkRing(p.x,p.y+2.0,p.z);}}}
+
+// 4. Bridge east → harbor road → Wuhu Town
+ringsAlongCurve([[152,4.5,80],[148,4.3,88],[138,4.2,96],[125,4.1,104],[110,4.1,110],[95,4.1,114],[78,4.1,115],[60,4.1,116],[42,4.1,116],[28,4.1,116]],1.8,8);
+
+// 5. Wuhu Town — fountain + streets
+for(let i=0;i<8;i++){const a=(i/8)*Math.PI*2;mkRing(25+Math.cos(a)*7,5.8,112+Math.sin(a)*7);}
+for(let i=0;i<10;i++)mkRing(-32+i*7,5.4,110);
+for(let i=0;i<5;i++)mkRing(25,5.4,120+i*7);
+mkRing(25,5.6,97);mkRing(25,5.6,94); // Town Hall
+
+// 6. Town → promenade (south)
+ringsAlongCurve([[25,4.2,155],[8,4.2,162],[-18,4.2,166],[-48,4.2,168],[-80,4.2,168]],1.8,7);
+
+// 7. Promenade boardwalk
+for(let i=0;i<24;i++)mkRing(-88+i*9,5.6,170);
+
+// 8. Promenade → Sweet Beach
+ringsAlongCurve([[-28,4.2,184],[12,4.2,198],[55,4.2,208],[104,4.2,213],[140,4.2,210]],1.8,7);
+
+// 9. Sweet Beach + Camel Rock
+for(let i=0;i<12;i++)mkRing(88+i*6,5.4,218);
+mkRing(190,12.5,172);mkRing(186,16.8,172);mkRing(197,14.5,172);
+
+// 10. East coast: Hotel → Lighthouse
+ringsAlongCurve([[160,4.5,182],[164,4.5,148],[165,4.5,106],[160,4.5,66],[154,4.5,30]],1.8,9);
+for(let i=0;i<5;i++)mkRing(148+i*2,5.5+i*3.8,20);
+mkRing(175,9,12);mkRing(175,14,12);mkRing(175,20,12);
+
+// 11. GOLF TRAIL north from town up through hills
+// Matches golf trail waypoints exactly
+[[25,4.4,108],[22,5.0,94],[18,6.2,78],[13,7.8,62],[7,9.5,46],
+ [1,11.4,30],[-5,13.6,14],[-9,16.2,-2],[-11,18.8,-18],[-13,22.0,-34],[-14,25.5,-50]
+].forEach(([x,y,z])=>mkRing(x,y+2,z));
+
+// 12. Volcano tunnel (east entrance ~x=56,z=-48 → west exit ~x=-62,z=-55)
+ringsAlongCurve([[56,8,-48],[38,9.5,-57],[18,10.8,-64],[0,11.2,-67],[-22,10.8,-64],[-44,9.2,-59],[-62,7.2,-54]],1.8,6);
+
+// 13. Tunnel exit → forest → ruins entrance
+ringsAlongCurve([[-62,7,-54],[-70,8.5,-62],[-78,10.5,-72],[-84,12,-84],[-86,12.5,-96]],1.8,7);
+
+// 14. Ruins dirt path up mesa
+ringsAlongCurve([[-85,4.5,-97],[-85,7,-110],[-85,9.5,-122],[-85,11.8,-135],[-85,13.2,-148],[-85,13.8,-160]],1.8,5);
+
+// 15. Ruins mesa circuit + columns + temple
+for(let i=0;i<14;i++){const a=(i/14)*Math.PI*2;mkRing(-85+Math.cos(a)*38,14.8,-145+Math.sin(a)*38);}
+for(let i=0;i<6;i++)mkRing(-70,14.5,-132-i*4.5);
+for(let i=0;i<6;i++)mkRing(-100,14.5,-132-i*4.5);
+for(let i=0;i<4;i++)mkRing(-85,14.5,-162-i*5);
+for(let i=0;i<5;i++){const a=(i/4)*Math.PI;mkRing(-67+Math.cos(a)*12,14.5+Math.sin(a)*15,-155);}
+
+// 16. Ruins → Castle (CX=-65,CZ=-115)
+ringsAlongCurve([[-85,13,-168],[-80,15.5,-176],[-75,17.5,-170],[-70,19.5,-158],[-67,21,-144],[-65,21.5,-130],[-65,22,-118]],1.8,7);
+
+// 17. Castle courtyard + battlements
+ringsAlongCurve([[-65,22.5,-115],[-65,22.5,-108],[-65,22.5,-100],[-65,22.5,-92]],2.2,6);
+for(let i=0;i<7;i++)mkRing(-87+i*7.4,29.5,-131);
+for(let i=0;i<7;i++)mkRing(-87+i*7.4,29.5,-99);
+for(let i=0;i<5;i++)mkRing(-87,29.5,-131+i*8);
+for(let i=0;i<5;i++)mkRing(-43,29.5,-131+i*8);
+[[-87,-131],[-87,-99],[-43,-131],[-43,-99]].forEach(([tx,tz])=>{mkRing(tx,33,tz);mkRing(tx,38,tz);});
+
+// 18. Castle staircase descent (CX=-65,CY=21,CZ=-115)
+{const cx=-65,cy=21,cz=-115;
+ const sw=[[cx+26,cy+2,cz],[cx+34,cy-2,cz-4],[cx+40,cy-6,cz-9],[cx+46,cy-11,cz-14],[cx+50,cy-17,cz-20],[cx+52,cy-22,cz-26],[cx+52,cy-27,cz-31]];
+ sw.forEach(([x,y,z])=>mkRing(x,y+1.5,z));}
+
+// 19. Cove floor + serpent tunnel (CCX=cx+52=-13, CCZ=cz-31=-146 ... wait recalc)
+{const cx=-65,cy=21,cz=-115,CCX=cx+52,CCY=cy-27,CCZ=cz-31;
+ for(let i=0;i<8;i++){const a=(i/8)*Math.PI*2;mkRing(CCX+Math.cos(a)*11,CCY-8.5,CCZ+Math.sin(a)*11);}
+ // Serpent tunnel
+ ringsAlongCurve([[CCX,CCY-9,CCZ+14],[CCX+4,CCY-9.5,CCZ+26],[CCX+7,CCY-9,CCZ+38]],1.5,4);}
+
+// 20. Castle → Duckling Lake → Falls
+ringsAlongCurve([[-65,21,-112],[-58,21.5,-108],[-52,21.8,-104],[-48,22,-98]],1.8,5);
+for(let i=0;i<10;i++){const a=(i/10)*Math.PI*2;mkRing(-48+Math.cos(a)*14,23.5,-98+Math.sin(a)*14);}
+ringsAlongCurve([[-48,21,-98],[-44,19,-85],[-40,17,-70],[-36,14.5,-55],[-33,13.5,-40],[-32,13,-28]],1.8,7);
+for(let i=0;i<7;i++){const a=(i/6)*Math.PI;mkRing(-32+Math.cos(a)*5,5.5+Math.sin(a)*13.5,-22);}
+
+// 21. River → Frontal Hills → Volcano spiral
+ringsAlongCurve([[-32,14.5,-26],[-24,12.5,-12],[-14,10,4],[-4,8,18],[6,7,32],[15,6.5,44],[22,5.8,55]],1.8,8);
+// The hill climb (connects river to volcano spiral start)
+[[-14,25.5,-50],[-14,22,-34],[-13,18.5,-18],[-11,16,-2],[-9,13.8,14],[-5,11.5,30],[1,9.5,46],[7,7.8,62]].forEach(([x,y,z])=>mkRing(x,y+2,z));
+
+// 22. Volcano spiral
+for(let i=0;i<=32;i++){const t=i/32,a=t*Math.PI*4.5,r=105-t*80,rx=-14+Math.cos(a)*r,rz=-72+Math.sin(a)*r;mkRing(rx,_vH(rx,rz)+2.2,rz);}
+for(let i=0;i<12;i++){const a=(i/12)*Math.PI*2;mkRing(-12+Math.cos(a)*14,86.5,-81+Math.sin(a)*14);}
+mkRing(-12,92,-81);mkRing(-12,97,-81);
+
+// 23. Volcano → Pirate's Eye (west loop)
+ringsAlongCurve([[-14,18,-72],[-28,13,-60],[-52,9,-50],[-78,6.5,-38],[-102,5.5,-20],[-128,5.2,-2],[-150,5.5,18]],1.8,9);
+mkRing(-164,15,22);mkRing(-164,20,22);mkRing(-164,25,22);
+
+// 24. West coast → Candle → private island
+ringsAlongCurve([[-150,5,20],[-146,4.8,55],[-140,4.6,90],[-132,4.5,126],[-120,4.5,152],[-96,4.4,180]],1.8,9);
+mkRing(-118,49,150);mkRing(-118,53,150);mkRing(-118,57,150);
+for(let i=0;i<6;i++){const a=(i/6)*Math.PI*2;mkRing(-232+Math.cos(a)*12,4.8,58+Math.sin(a)*12);}
+
+// 25. Wind Orchard + Evergreen Grove
+for(let i=0;i<6;i++)mkRing(-25-i*6,5.5,60+i*2);
+mkRing(-36,15.5,62);mkRing(-52,15.8,68);mkRing(-22,15.2,58);
+[[-50,-40],[-60,-50],[-72,-55],[-82,-62],[-92,-68],[-100,-80]].forEach(([x,z])=>{
+  const d=Math.sqrt((x+72)*(x+72)+(z+55)*(z+55));
+  const y=d<65?3.5+(1-d/65)*12:3.5;
+  mkRing(x,y+2.2,z);
+});
+
+// Total: ~330 rings
+
+// SEAGULLS
+// ══════════════════════════════════════════════════════
+const gulls=[];
+const guM=new THREE.MeshBasicMaterial({color:0xEEEEEE,side:THREE.DoubleSide});
+for(let i=0;i<18;i++){
+  const g=new THREE.Mesh(new THREE.PlaneGeometry(1.5,.38),guM);
+  g.position.set((Math.random()-.5)*400,22+Math.random()*28,(Math.random()-.5)*400);
+  g.userData={baseY:g.position.y,ph:Math.random()*6.28,sp:.2+Math.random()*.22,rd:28+Math.random()*40,an:Math.random()*6.28,cx:g.position.x,cz:g.position.z};
+  scene.add(g);gulls.push(g);
+}
+
+// ══════════════════════════════════════════════════════
+// MINIMAP
+// ══════════════════════════════════════════════════════
+const mmCanvas=document.getElementById('mmcv');
+const mmCtx=mmCanvas.getContext('2d');
+function drawMinimap(px,pz){
+  const W=130,H=130,CX=65,CY=65;
+  const scale=W/480;
+  mmCtx.clearRect(0,0,W,H);
+  // Ocean
+  mmCtx.fillStyle='#1A6ED8';mmCtx.beginPath();mmCtx.arc(CX,CY,62,0,Math.PI*2);mmCtx.fill();
+  // Main island — irregular
+  mmCtx.fillStyle='#60C03C';mmCtx.beginPath();mmCtx.ellipse(CX,CY+5,42,48,0,0,Math.PI*2);mmCtx.fill();
+  // Sweet beach (SE)
+  mmCtx.fillStyle='#E8D4A0';mmCtx.beginPath();mmCtx.ellipse(CX+18,CY+28,16,13,-.3,0,Math.PI*2);mmCtx.fill();
+  // Volcano
+  mmCtx.fillStyle='#554844';mmCtx.beginPath();mmCtx.arc(CX-4,CY-18,12,0,Math.PI*2);mmCtx.fill();
+  // Crater glow
+  mmCtx.fillStyle='#FF4400';mmCtx.beginPath();mmCtx.arc(CX-4,CY-18,5,0,Math.PI*2);mmCtx.fill();
+  // Mysterious Ruins mesa
+  mmCtx.fillStyle='#C8B890';mmCtx.beginPath();mmCtx.arc(CX-18,CY-32,9,0,Math.PI*2);mmCtx.fill();
+  mmCtx.strokeStyle='#AA9966';mmCtx.lineWidth=1;mmCtx.stroke();
+  // Serpent's Mouth (below ruins)
+  mmCtx.fillStyle='#006644';mmCtx.beginPath();mmCtx.arc(CX-19,CY-40,4,0,Math.PI*2);mmCtx.fill();
+  // Island loop road (dotted)
+  mmCtx.setLineDash([2,2]);mmCtx.strokeStyle='#DDCCAA';mmCtx.lineWidth=1.5;
+  mmCtx.beginPath();mmCtx.ellipse(CX+2,CY+5,38,44,.1,0,Math.PI*2);mmCtx.stroke();
+  mmCtx.setLineDash([]);
+  // Pirate's Eye
+  mmCtx.fillStyle='#554844';mmCtx.beginPath();mmCtx.arc(CX-30,CY+2,5,0,Math.PI*2);mmCtx.fill();
+  // Red Iron Bridge
+  mmCtx.strokeStyle='#882222';mmCtx.lineWidth=2;mmCtx.beginPath();mmCtx.moveTo(CX+14,CY+15);mmCtx.lineTo(CX+24,CY+5);mmCtx.stroke();
+  // Private island
+  mmCtx.fillStyle='#60C03C';mmCtx.beginPath();mmCtx.ellipse(CX-48,CY,7,5,0,0,Math.PI*2);mmCtx.fill();
+  // Player
+  const mx=CX+(px/240)*42,my=CY+(pz/240)*42;
+  mmCtx.beginPath();mmCtx.arc(Math.max(3,Math.min(W-3,mx)),Math.max(3,Math.min(H-3,my)),3.5,0,Math.PI*2);
+  mmCtx.fillStyle='#FF4444';mmCtx.fill();mmCtx.strokeStyle='white';mmCtx.lineWidth=1.2;mmCtx.stroke();
+  // Compass N
+  mmCtx.fillStyle='rgba(255,255,255,.8)';mmCtx.font='bold 9px Arial';mmCtx.fillText('N',CX-3,10);
+}
+
+// ══════════════════════════════════════════════════════
+// AUDIO
+// ══════════════════════════════════════════════════════
+let ax=null;
+function snd(f1,f2,dur,ty,vol){
+  if(!ax)ax=new(window.AudioContext||window.webkitAudioContext)();
+  const o=ax.createOscillator(),g=ax.createGain();
+  o.connect(g);g.connect(ax.destination);o.type=ty||'sine';
+  o.frequency.setValueAtTime(f1,ax.currentTime);
+  o.frequency.exponentialRampToValueAtTime(f2,ax.currentTime+dur*.6);
+  g.gain.setValueAtTime(vol||.18,ax.currentTime);
+  g.gain.exponentialRampToValueAtTime(.001,ax.currentTime+dur);
+  o.start();o.stop(ax.currentTime+dur);
+}
+function ringChime(){snd(1200,2400,.18);setTimeout(()=>snd(1600,2800,.14),65);}
+function popup(t,c){const p=document.getElementById('rp');p.textContent=t;p.style.color=c||'#FFD700';p.style.opacity='1';setTimeout(()=>p.style.opacity='0',500);}
+let notifyTimeout=null;
+function notify(t){
+  const n=document.getElementById('notify');n.textContent=t;n.style.opacity='1';
+  if(notifyTimeout)clearTimeout(notifyTimeout);
+  notifyTimeout=setTimeout(()=>n.style.opacity='0',2800);
+}
+
+// ══════════════════════════════════════════════════════
+// CONTROLS
+// ══════════════════════════════════════════════════════
+function doJump(){
+  if(onGround){velY=JV;onGround=false;jumpCount=1;snd(400,900,.1);}
+  else if(jumpCount===1){velY=JV2;jumpCount=2;snd(520,1050,.1);}
+  else if(jumpCount===2){boosting=true;boostTimer=2.5;curSpeed=BOOST_SPD;jumpCount=3;snd(200,800,.14,'sawtooth',.1);document.getElementById('spd').classList.add('active');document.getElementById('bf').style.opacity='1';setTimeout(()=>document.getElementById('bf').style.opacity='0',200);}
+}
+function doBoost(){
+  if(boostCooldown>0)return;boosting=true;boostTimer=1.8;curSpeed=BOOST_SPD;boostCooldown=3;
+  snd(150,600,.1,'sawtooth',.08);document.getElementById('spd').classList.add('active');
+  document.getElementById('bf').style.opacity='1';setTimeout(()=>document.getElementById('bf').style.opacity='0',180);
+}
+
+let yaw=0,pitch=.1;const euler=new THREE.Euler(0,0,0,'YXZ');const keys={};
+document.addEventListener('keydown',e=>{
+  if(!keys[e.code]){if(e.code==='Space'&&started){e.preventDefault();doJump();}if((e.code==='ShiftLeft'||e.code==='ShiftRight')&&started)doBoost();}
+  keys[e.code]=true;if(e.code==='Space')e.preventDefault();
+});
+document.addEventListener('keyup',e=>keys[e.code]=false);
+
+let pL=false;
+R.domElement.addEventListener('click',()=>{if(!started||mob)return;R.domElement.requestPointerLock();});
+document.addEventListener('pointerlockchange',()=>{pL=document.pointerLockElement===R.domElement;});
+document.addEventListener('mousemove',e=>{if(!pL||!started)return;yaw-=e.movementX*.002;pitch-=e.movementY*.002;pitch=Math.max(-1.1,Math.min(1.1,pitch));});
+
+let ltid=null,llx=0,lly=0;
+const lzE=document.getElementById('lz');
+lzE.addEventListener('touchstart',e=>{for(const t of e.changedTouches){if(t.clientX<155&&t.clientY>innerHeight-155)continue;if(t.clientX>innerWidth-110&&t.clientY>innerHeight-180)continue;if(ltid===null){ltid=t.identifier;llx=t.clientX;lly=t.clientY;}}});
+lzE.addEventListener('touchmove',e=>{for(const t of e.changedTouches)if(t.identifier===ltid){yaw-=(t.clientX-llx)*.004;pitch-=(t.clientY-lly)*.004;pitch=Math.max(-1.1,Math.min(1.1,pitch));llx=t.clientX;lly=t.clientY;}});
+lzE.addEventListener('touchend',e=>{for(const t of e.changedTouches)if(t.identifier===ltid)ltid=null;});
+
+const jbb=document.getElementById('jb'),jss=document.getElementById('jsk'),jzz=document.getElementById('jz');
+jzz.addEventListener('touchstart',e=>{e.preventDefault();jid=e.changedTouches[0].identifier;uJ(e.changedTouches[0]);});
+jzz.addEventListener('touchmove',e=>{e.preventDefault();for(const t of e.changedTouches)if(t.identifier===jid)uJ(t);});
+jzz.addEventListener('touchend',e=>{for(const t of e.changedTouches)if(t.identifier===jid){jid=null;md.x=0;md.z=0;jss.style.transform='translate(-50%,-50%)';}});
+function uJ(t){const r=jbb.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2;let dx=t.clientX-cx,dy=t.clientY-cy;const d2=Math.sqrt(dx*dx+dy*dy),mx=r.width/2-24;if(d2>mx){dx*=mx/d2;dy*=mx/d2;}jss.style.transform=`translate(calc(-50% + ${dx}px),calc(-50% + ${dy}px))`;md.x=dx/mx;md.z=dy/mx;}
+document.getElementById('jmp').addEventListener('touchstart',e=>{e.preventDefault();if(started)doJump();});
+document.getElementById('bst').addEventListener('touchstart',e=>{e.preventDefault();if(started)doBoost();});
+document.getElementById('sb').addEventListener('click',()=>{
+  started=true;document.getElementById('tc').style.display='none';document.getElementById('hud').style.display='flex';
+  if(ax)ax.resume();setTimeout(()=>notify('Welcome to Wuhu Island! Follow the gold rings!'),400);
+});
+
+
+// ══════════════════════════════════════════════════════
+// TERRAIN HEIGHT SAMPLER
+// Returns walkable surface Y at world (x,z).
+// Exactly mirrors all buildIsland geometry.
+// ══════════════════════════════════════════════════════
+function getTerrainHeight(x,z){
+  const dI=Math.sqrt(x*x+(z-28)*(z-28));
+  if(dI>215)return -1; // ocean
+  let h=3.5;
+
+  // Frontal hills (4 tiers)
+  const dh1=Math.sqrt(x*x+(z-28)*(z-28));if(dh1<78)h=Math.max(h,3.5+(1-dh1/78)*5.5);
+  const dh2=Math.sqrt(x*x+(z-2)*(z-2));if(dh2<62)h=Math.max(h,9+(1-dh2/62)*9);
+  const dh3=Math.sqrt((x+12)*(x+12)+(z+24)*(z+24));if(dh3<44)h=Math.max(h,18+(1-dh3/44)*8);
+  const dh4=Math.sqrt((x+14)*(x+14)+(z+44)*(z+44));if(dh4<36)h=Math.max(h,23+(1-dh4/36)*6);
+
+  // Maka Wuhu volcano (5 tiers)
+  const dv=Math.sqrt((x+14)*(x+14)+(z+72)*(z+72));
+  if(dv<112)h=Math.max(h,3.5+(1-dv/112)*14.5);
+  if(dv<88) h=Math.max(h,18+(1-dv/88)*13);
+  if(dv<66) h=Math.max(h,31+(1-dv/66)*15);
+  if(dv<48) h=Math.max(h,46+(1-dv/48)*17);
+  if(dv<30) h=Math.max(h,63+(1-dv/30)*22);
+  if(dv>=10&&dv<=20)h=Math.max(h,84); // crater rim walkway
+
+  // Summerstone Falls plateau
+  const dsf=Math.sqrt((x+32)*(x+32)+(z+25)*(z+25));
+  if(dsf<60)h=Math.max(h,3.5+(1-dsf/60)*13);
+
+  // Evergreen grove ridge
+  const deg=Math.sqrt((x+72)*(x+72)+(z+55)*(z+55));
+  if(deg<65)h=Math.max(h,3.5+(1-deg/65)*12);
+
+  // Duckling Lake highland
+  const dlk=Math.sqrt((x+48)*(x+48)+(z+98)*(z+98));
+  if(dlk<38)h=Math.max(h,19+(1-dlk/38)*4);
+
+  // Castle highland
+  const dch=Math.sqrt((x+65)*(x+65)+(z+115)*(z+115));
+  if(dch<55)h=Math.max(h,3.5+(1-dch/55)*19);
+  // Castle courtyard flat floor
+  if(Math.abs(x+65)<26&&Math.abs(z+115)<23)h=Math.max(h,23);
+
+  // Ruins mesa
+  const drm=Math.sqrt((x+85)*(x+85)+(z+145)*(z+145));
+  if(drm<90)h=Math.max(h,3.5+(1-drm/90)*9.5);
+  if(drm<75)h=Math.max(h,12.5);
+
+  // Pirate's Eye
+  const dpe=Math.sqrt((x+150)*(x+150)+(z-18)*(z-18));
+  if(dpe<48)h=Math.max(h,3.5+(1-dpe/48)*8);
+
+  return h;
+}
+
+// ══════════════════════════════════════════════════════
+// DEBUG OVERLAY (F3 to toggle, Shift+R to respawn)
+// ══════════════════════════════════════════════════════
+const dbgEl=document.getElementById('dbg');
+let dbgOn=false;
+document.addEventListener('keydown',e=>{
+  if(e.code==='F3'){e.preventDefault();dbgOn=!dbgOn;dbgEl.style.display=dbgOn?'block':'none';}
+  if(e.code==='KeyR'&&e.shiftKey&&started){
+    const rh=getTerrainHeight(106,55)+1.8;
+    playerY=rh;smoothFloor=rh;velY=0;onGround=true;jumpCount=0;
+    cam.position.set(106,rh,55);notify('Respawned at Harbor.');
+  }
+});
+
+// ══════════════════════════════════════════════════════
+// GAME LOOP
+// ══════════════════════════════════════════════════════
+const clock=new THREE.Clock();
+let lastZone=0,lastMM=0,lavaPulse=0;
+let smoothFloor=5.5,stepAccum=0;
+// Expose volcGlow for pulse (may be set by buildIsland)
+const volcGlowLight=window.volcGlowRef||scene.children.find(c=>c.isPointLight&&c.color.r>.8&&c.color.g<.3);
+
+function animate(){
+  requestAnimationFrame(animate);
+  const dt=Math.min(clock.getDelta(),.05);
+  const time=clock.elapsedTime;
+  if(!started){R.render(scene,cam);return;}
+
+  // Water shader
+  waterShaderMat.uniforms.uTime.value=time;
+  waterShaderMat.uniforms.uSunDir.value.set(.55+Math.sin(time*.05)*.05,.82,.15+Math.cos(time*.04)*.05).normalize();
+  riverTx.offset.set(0,time*.022);
+  foMat.opacity=.38+Math.sin(time*1.4)*.1;
+
+  // Cloud drift
+  for(let i=0;i<clouds.length;i++){
+    const sp=clouds[i].position.y<70?.28:clouds[i].position.y<100?.18:.10;
+    clouds[i].position.x+=dt*(sp+i*.003);
+    if(clouds[i].position.x>620)clouds[i].position.x=-620;
+  }
+
+  // Seagulls
+  for(const g of gulls){
+    g.userData.an+=dt*g.userData.sp*.24;
+    g.position.x=g.userData.cx+Math.cos(g.userData.an)*g.userData.rd;
+    g.position.z=g.userData.cz+Math.sin(g.userData.an)*g.userData.rd;
+    g.position.y=g.userData.baseY+Math.sin(time*g.userData.sp+g.userData.ph)*2.2;
+    g.lookAt(g.position.x+Math.cos(g.userData.an+.1),g.position.y,g.position.z+Math.sin(g.userData.an+.1));
+  }
+
+  // Rings bob + spin
+  for(const r of rObjs){
+    if(r.userData.collected)continue;
+    r.rotation.y+=dt*2.2;
+    r.position.y=r.userData.baseY+Math.sin(time*1.6+r.position.x*.4)*.26;
+  }
+
+  // Lava pulse
+  lavaPulse+=dt;
+  if(volcGlowLight){
+    volcGlowLight.intensity=1.4+Math.sin(lavaPulse*1.8)*.6;
+    volcGlowLight.color.setHSL(.04+Math.sin(lavaPulse*.9)*.02,1,.42+Math.sin(lavaPulse*2.2)*.06);
+  }
+
+  playerLight.position.copy(cam.position);playerLight.position.y+=3;
+
+  // Boost
+  if(boosting){boostTimer-=dt;if(boostTimer<=0){boosting=false;curSpeed=BASE_SPD;document.getElementById('spd').classList.remove('active');}}
+  if(boostCooldown>0)boostCooldown-=dt;
+
+  // ── MOVEMENT ──
+  const fwd=new THREE.Vector3(0,0,-1).applyEuler(new THREE.Euler(0,yaw,0));
+  const right=new THREE.Vector3(1,0,0).applyEuler(new THREE.Euler(0,yaw,0));
+  let mx2=0,mz2=0;
+  if(mob){mx2=md.x;mz2=md.z;}
+  else{
+    if(keys.KeyW||keys.ArrowUp)mz2-=1;if(keys.KeyS||keys.ArrowDown)mz2+=1;
+    if(keys.KeyA||keys.ArrowLeft)mx2-=1;if(keys.KeyD||keys.ArrowRight)mx2+=1;
+  }
+  const mv=new THREE.Vector3();
+  mv.addScaledVector(fwd,-mz2);mv.addScaledVector(right,mx2);
+  const moving=mv.length()>0;
+  if(moving)mv.normalize();
+
+  // Slope speed reduction
+  const tx=cam.position.x,tz=cam.position.z;
+  const tHere=getTerrainHeight(tx,tz);
+  const tAhead=getTerrainHeight(tx+mv.x*.8,tz+mv.z*.8);
+  const rise=Math.max(0,tAhead-tHere);
+  const slopeFactor=Math.max(.48,1-rise*.09);
+  cam.position.x+=mv.x*curSpeed*slopeFactor*dt;
+  cam.position.z+=mv.z*curSpeed*slopeFactor*dt;
+
+  // ── PHYSICS ──
+  const EYE=1.8;
+  velY+=GRV*dt;
+  playerY+=velY*dt;
+
+  const nx=cam.position.x,nz=cam.position.z;
+  let terrH=getTerrainHeight(nx,nz);
+  if(terrH<0)terrH=0;
+
+  // Special zone floors
+  // Tunnel corridor
+  if(nx>-65&&nx<58&&nz>-70&&nz<-44&&playerY>3&&playerY<16)terrH=Math.max(terrH,6.8);
+  // Castle cove chamber (CCX=cx+52=-13, CCZ=cz-31=-146)
+  const coveCX=-65+52,coveCZ=-115-31;
+  if(Math.sqrt((nx-coveCX)**2+(nz-coveCZ)**2)<25&&playerY>coveCX-40&&playerY<-3)terrH=Math.max(terrH,-10+1);
+  // Serpent tunnel
+  if(nx>coveCX-5&&nx<coveCX+15&&nz>coveCZ&&nz<coveCZ+42&&playerY>coveCZ-48&&playerY<-5)terrH=Math.max(terrH,-9);
+
+  // ── PLATFORM COLLISION ──
+  // p.h is the TOP SURFACE Y. Player lands when feet (playerY-EYE) reach that surface.
+  let platH=-9999;let onPlat=false;
+  for(const p of platforms){
+    const dx2=nx-p.pos.x,dz2=nz-p.pos.z;
+    if(Math.abs(dx2)<=p.w/2+.9&&Math.abs(dz2)<=p.d/2+.9){
+      const surf=p.h; // top surface Y
+      const feetY=playerY-EYE;
+      if(feetY<=surf+2.5&&feetY>=surf-6&&velY<=.1){
+        if(surf>platH){platH=surf;onPlat=true;}
+      }
+    }
+  }
+
+  // Best floor: terrain or platform, whichever is higher at player position
+  const bestFloor=onPlat&&platH>terrH?platH:terrH;
+  const floorEye=bestFloor+EYE;
+
+  // Smooth floor lerp (removes jitter on uneven ground)
+  smoothFloor+=(floorEye-smoothFloor)*Math.min(1,(onGround?16:28)*dt);
+
+  // Step up small obstacles, land on surfaces
+  const feetY=playerY-EYE;
+  if(bestFloor>feetY&&bestFloor-feetY<=1.6&&velY<=0){
+    // Step up
+    playerY=floorEye;velY=0;onGround=true;jumpCount=0;
+  } else if(playerY<=floorEye+.2&&velY<=0){
+    // Grounded
+    playerY=floorEye;velY=0;onGround=true;jumpCount=0;
+  } else if(playerY>floorEye+.6){
+    onGround=false;
+  }
+
+  // Apply smooth camera height + footstep bob
+  cam.position.y=onGround?smoothFloor:playerY;
+  if(onGround&&moving){stepAccum+=dt*curSpeed*slopeFactor*.8;cam.position.y+=Math.sin(stepAccum)*.05;}
+
+  // World bounds
+  cam.position.x=Math.max(-298,Math.min(258,cam.position.x));
+  cam.position.z=Math.max(-220,Math.min(298,cam.position.z));
+
+  // Ocean/cliff fall respawn
+  if(playerY<-18||(Math.sqrt(nx*nx+(nz-28)*(nz-28))>225&&playerY<5)){
+    const rh=getTerrainHeight(106,55)+EYE;
+    playerY=rh;smoothFloor=rh;velY=0;onGround=true;jumpCount=0;boosting=false;
+    cam.position.set(106,rh,55);
+    notify('Swept into the sea! Back to the Harbor.');
+  }
+
+  euler.set(pitch,yaw,0,'YXZ');cam.quaternion.setFromEuler(euler);
+
+  // ── RING COLLECTION ──
+  for(const r of rObjs){
+    if(r.userData.collected)continue;
+    if(cam.position.distanceTo(r.position)<RD){
+      r.userData.collected=true;r.visible=false;goldRings++;
+      document.getElementById('rn').textContent=goldRings;
+      ringChime();popup('+1','#FFD700');
+      if(goldRings===10) notify('Head to the Red Iron Bridge!');
+      if(goldRings===28) notify('Welcome to Wuhu Town!');
+      if(goldRings===50) notify('Follow the golf trail north!');
+      if(goldRings===72) notify('Entering the Volcano Tunnel!');
+      if(goldRings===95) notify('The Mysterious Ruins!');
+      if(goldRings===118)notify('Summerstone Castle ahead!');
+      if(goldRings===138)notify('Descend into the Serpent Cove...');
+      if(goldRings===162)notify('Climbing Maka Wuhu — watch the lava!');
+      if(goldRings===200)notify('Almost at the summit!');
+      if(goldRings===240)notify('WUHU ISLAND MASTER! You conquered the island!');
+    }
+  }
+
+  // ── ZONE DETECTION ──
+  lastZone+=dt;
+  if(lastZone>.42){
+    lastZone=0;
+    let best='Open Ocean',bestD=9999;
+    for(const z of ZONES){
+      const d=Math.sqrt((nx-z.cx)**2+(nz-z.cz)**2);
+      if(d<z.r&&d<bestD){bestD=d;best=z.name;}
+    }
+    if(best!==curZone){
+      curZone=best;
+      document.getElementById('zone-hud').textContent=curZone;
+      notify(curZone);
+    }
+  }
+
+  // ── MINIMAP ──
+  lastMM+=dt;
+  if(lastMM>.28){lastMM=0;drawMinimap(nx,nz);}
+
+  // ── DEBUG ──
+  if(dbgOn){
+    const tv=getTerrainHeight(nx,nz);
+    const np=platforms.filter(p=>Math.abs(nx-p.pos.x)<p.w/2+2&&Math.abs(nz-p.pos.z)<p.d/2+2).length;
+    dbgEl.textContent=
+      `XYZ  ${nx.toFixed(1)} ${cam.position.y.toFixed(1)} ${nz.toFixed(1)}\n`+
+      `TERR ${tv.toFixed(2)}  FLOOR ${bestFloor.toFixed(2)}  SMTH ${smoothFloor.toFixed(2)}\n`+
+      `PLYR Y:${playerY.toFixed(2)}  velY:${velY.toFixed(2)}\n`+
+      `GRND ${onGround}  jump#:${jumpCount}  boost:${boosting}\n`+
+      `SPDF ${slopeFactor.toFixed(2)}  spd:${(curSpeed*slopeFactor).toFixed(1)}\n`+
+      `PLAT near:${np}  on:${onPlat}  h:${platH.toFixed(1)}\n`+
+      `ZONE ${curZone}\n`+
+      `RING ${goldRings}/${rObjs.length}\n`+
+      `[F3]=hide  [Shift+R]=respawn`;
+  }
+
+  R.render(scene,cam);
+}
+animate();
+window.addEventListener('resize',()=>{cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix();R.setSize(innerWidth,innerHeight);});
+})();
+</script>
+</body>
+</html>
