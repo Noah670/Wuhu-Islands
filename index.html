@@ -2715,7 +2715,6 @@ function doBoost(){
 let yaw=0,pitch=.1;const euler=new THREE.Euler(0,0,0,'YXZ');const keys={};
 let flyMode=false;
 const FLY_SPD=34;
-const flyInput={up:false,down:false};
 const flyToggleBtn=document.getElementById('fly-toggle');
 function setFlyMode(next){
   flyMode=!!next;
@@ -2922,8 +2921,8 @@ function animate(){
   let onPlat=false,platH=-9999;
   if(flyMode){
     let yInput=0;
-    if(keys.Space||flyInput.up)yInput+=1;
-    if(keys.ControlLeft||keys.ControlRight||keys.KeyC||flyInput.down)yInput-=1;
+    if(keys.Space)yInput+=1;
+    if(keys.ControlLeft||keys.ControlRight||keys.KeyC)yInput-=1;
     cam.position.y+=yInput*FLY_SPD*dt;
     playerY=cam.position.y;
     velY=0;
