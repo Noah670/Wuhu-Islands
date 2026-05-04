@@ -7,8 +7,8 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{width:100%;height:100%;overflow:hidden;background:#55CCFF;touch-action:none;-webkit-user-select:none;user-select:none}
-canvas{display:block;filter:saturate(1.14) brightness(1.06)}
-#vignette{position:fixed;inset:0;pointer-events:none;z-index:2;background:radial-gradient(ellipse at 50% 40%,rgba(255,255,255,0) 38%,rgba(200,235,255,.06) 70%,rgba(160,210,255,.12) 100%)}
+canvas{display:block;filter:saturate(1.2) brightness(1.09) contrast(1.04)}
+#vignette{position:fixed;inset:0;pointer-events:none;z-index:2;background:radial-gradient(ellipse at 50% 38%,rgba(255,255,255,0) 32%,rgba(190,230,255,.05) 62%,rgba(140,198,255,.15) 100%)}
 #hud{position:fixed;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:flex-start;padding:10px 16px;pointer-events:none;z-index:10;flex-wrap:wrap;gap:6px}
 #left-hud{display:flex;flex-direction:column;gap:5px}
 #rc{font-family:'Arial Rounded MT Bold',Arial,sans-serif;font-size:22px;font-weight:900;color:#FFD700;text-shadow:2px 2px 0 #996600,0 0 10px rgba(255,200,0,.4);display:flex;align-items:center;gap:6px}
@@ -27,6 +27,8 @@ canvas{display:block;filter:saturate(1.14) brightness(1.06)}
 #jsk{width:46px;height:46px;border-radius:50%;background:rgba(255,255,255,.28);border:2px solid rgba(255,255,255,.4);position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)}
 #jmp{position:fixed;bottom:35px;right:28px;z-index:20;width:64px;height:64px;border-radius:50%;background:rgba(0,150,255,.28);border:3px solid rgba(0,150,255,.5);color:#fff;font-family:Arial,sans-serif;font-size:10px;font-weight:900;display:flex;align-items:center;justify-content:center;pointer-events:auto}
 #bst{position:fixed;bottom:110px;right:28px;z-index:20;width:52px;height:52px;border-radius:50%;background:rgba(255,120,0,.28);border:3px solid rgba(255,120,0,.5);color:#fff;font-family:Arial,sans-serif;font-size:9px;font-weight:900;display:flex;align-items:center;justify-content:center;pointer-events:auto}
+#fup,#fdn{position:fixed;right:102px;z-index:20;width:52px;height:52px;border-radius:50%;background:rgba(0,170,255,.28);border:3px solid rgba(120,220,255,.55);color:#fff;font-family:Arial,sans-serif;font-size:9px;font-weight:900;display:none;align-items:center;justify-content:center;pointer-events:auto}
+#fup{bottom:110px}#fdn{bottom:48px}
 #lz{position:fixed;inset:0;z-index:5;pointer-events:auto}
 #rp{position:fixed;top:38%;left:50%;transform:translate(-50%,-50%);font-family:'Arial Rounded MT Bold',Arial,sans-serif;font-size:22px;font-weight:900;pointer-events:none;z-index:15;opacity:0;transition:opacity .15s;text-shadow:2px 2px 4px rgba(0,0,0,.6)}
 #bf{position:fixed;inset:0;background:radial-gradient(circle,rgba(0,200,255,.1),transparent 70%);pointer-events:none;z-index:4;opacity:0;transition:opacity .25s}
@@ -34,8 +36,10 @@ canvas{display:block;filter:saturate(1.14) brightness(1.06)}
 #minimap{position:fixed;bottom:16px;right:16px;width:130px;height:130px;border-radius:50%;border:3px solid rgba(255,255,255,.4);background:rgba(0,20,60,.7);overflow:hidden;pointer-events:none;z-index:10}
 #minimap canvas{width:130px;height:130px}
 #dbg{position:fixed;top:60px;right:12px;font:11px/1.6 monospace;color:#00FF88;background:rgba(0,0,0,.65);padding:8px 12px;border-radius:8px;pointer-events:none;z-index:50;display:none;white-space:pre;border:1px solid rgba(0,255,136,.2)}
+#fly-toggle{position:fixed;top:14px;right:14px;z-index:30;pointer-events:auto;background:rgba(20,40,80,.82);border:2px solid rgba(140,220,255,.75);color:#E8F8FF;font:700 12px Arial,sans-serif;padding:8px 12px;border-radius:9px;cursor:pointer;letter-spacing:.4px}
+#fly-toggle.on{background:rgba(0,170,255,.85);border-color:#8be7ff;color:#fff;box-shadow:0 0 10px rgba(0,220,255,.45)}
 @media(min-width:769px){#jz,#jmp,#bst,#lz{display:none}#dh{position:fixed;bottom:10px;left:50%;transform:translateX(-50%);font-family:Arial,sans-serif;font-size:11px;color:rgba(255,255,255,.35);pointer-events:none;z-index:10}}
-@media(max-width:768px){#tc h1{font-size:26px}#minimap{display:none}#dh{display:none}}
+@media(max-width:768px){#tc h1{font-size:26px}#minimap{display:none}#dh{display:none}#fup,#fdn{display:flex}#fly-toggle{top:auto;bottom:172px;right:24px;font-size:11px;padding:7px 10px}}
 </style>
 </head>
 <body>
@@ -56,9 +60,11 @@ canvas{display:block;filter:saturate(1.14) brightness(1.06)}
 <div id="rp"></div><div id="bf"></div><div id="notify"></div><div id="lz"></div>
 <div id="jz"><div id="jb"><div id="jsk"></div></div></div>
 <div id="jmp">JUMP</div><div id="bst">BOOST</div>
+<div id="fup">FLY ▲</div><div id="fdn">FLY ▼</div>
 <div id="minimap"><canvas id="mmcv" width="130" height="130"></canvas></div>
+<button id="fly-toggle" aria-pressed="false">Fly: OFF (G)</button>
 <div id="dbg"></div>
-<div id="dh">WASD · Mouse · Space=Jump · Shift=Boost · Click=Lock · F3=Debug · Shift+R=Respawn</div>
+<div id="dh">WASD · Mouse · Space=Jump · Shift=Boost · G=Fly Toggle · Click=Lock · F3=Debug · Shift+R=Respawn</div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
 (function(){
@@ -127,27 +133,29 @@ const sandTx=mkT(256,256,(d,w)=>{
 });sandTx.repeat.set(18,18);
 
 // Wii Sports golf course grass — vivid bright green, subtle mow stripes
-const grassTx=mkT(256,256,(d,w,h)=>{
+const grassTx=mkT(512,512,(d,w,h)=>{
   for(let y=0;y<h;y++)for(let x=0;x<w;x++){
     const p=(y*w+x)*4;
-    // Alternating mow stripes every 16px (dark/light green bands)
-    const stripe=Math.floor(y/16)%2;
-    const base=stripe?210:195;
-    const n=(Math.random()-.5)*16;
-    const blade=Math.sin(x*.22)*4+Math.cos(y*.18)*3;
-    d[p]  =Math.min(255,Math.max(0,48 +n*.2+blade*.1));
-    d[p+1]=Math.min(255,Math.max(0,base+n   +blade  ));
-    d[p+2]=Math.min(255,Math.max(0,40 +n*.15+blade*.1));
+    const stripe=Math.floor((x+y*.35)/18)%2;
+    const base=stripe?214:190;
+    const n=(Math.random()-.5)*12;
+    const blade=Math.sin(x*.38)*3+Math.cos(y*.24)*2.6+Math.sin((x+y)*.14)*1.8;
+    const vein=((x%17===0||y%19===0)?-10:0);
+    d[p]  =Math.min(255,Math.max(0,54+n*.2+blade*.12+vein*.15));
+    d[p+1]=Math.min(255,Math.max(0,base+n+blade+vein));
+    d[p+2]=Math.min(255,Math.max(0,42+n*.2+blade*.16+vein*.25));
     d[p+3]=255;
   }
-});grassTx.repeat.set(22,22);
+});grassTx.repeat.set(28,28);
 
-const stoneTx=mkT(128,128,(d)=>{
+const stoneTx=mkT(256,256,(d,w,h)=>{
   for(let i=0;i<d.length;i+=4){
-    const n=(Math.random()-.5)*50,c=Math.random()<.04?-22:0,crack=Math.random()<.006?-38:0;
-    d[i]=Math.min(255,Math.max(0,145+n+c+crack));
-    d[i+1]=Math.min(255,Math.max(0,140+n+c+crack));
-    d[i+2]=Math.min(255,Math.max(0,132+n*.8+c+crack));d[i+3]=255;
+    const px=(i/4)%w,py=((i/4)/w)|0;
+    const n=(Math.random()-.5)*36,c=Math.random()<.03?-18:0,crack=(Math.sin(px*.12)+Math.cos(py*.1)>1.65)?-30:0;
+    const strata=Math.sin((px+py)*.04)*8+Math.cos(py*.06)*6;
+    d[i]=Math.min(255,Math.max(0,156+n+c+crack+strata));
+    d[i+1]=Math.min(255,Math.max(0,148+n*.9+c+crack+strata*.9));
+    d[i+2]=Math.min(255,Math.max(0,136+n*.75+c+crack+strata*.7));d[i+3]=255;
   }
 });
 
@@ -235,9 +243,9 @@ const thatchTx=mkT(128,128,(d,w,h)=>{
 // ══════════════════════════════════════════════════════
 const scene=new THREE.Scene();
 // Super Mario Galaxy 2 — brilliant cerulean sky
-scene.background=new THREE.Color(0x55CCFF);
+scene.background=new THREE.Color(0x5CCEFF);
 // Bright sky-tinted haze, very light so distant land stays visible
-scene.fog=new THREE.FogExp2(0x88DDFF,0.00085);
+scene.fog=new THREE.FogExp2(0xA5E7FF,0.00072);
 
 const cam=new THREE.PerspectiveCamera(72,innerWidth/innerHeight,.5,1000);
 cam.position.set(90,6,65);// Harbor dock start
@@ -250,17 +258,17 @@ if(R.shadowMap.enabled)R.shadowMap.type=THREE.PCFSoftShadowMap;
 R.outputColorSpace=THREE.SRGBColorSpace;
 R.toneMapping=THREE.ACESFilmicToneMapping;
 // Slightly higher exposure — SMG2 feels bright and overexposed-crisp
-R.toneMappingExposure=1.08;
+R.toneMappingExposure=1.16;
 document.body.appendChild(R.domElement);
 
 // ══════════════════════════════════════════════════════
 // LIGHTING — Super Mario Galaxy 2 bright tropical day
 // ══════════════════════════════════════════════════════
 // Hemisphere: vivid sky-blue from above (SMG2 sky colour), warm peach-gold from below
-scene.add(new THREE.HemisphereLight(0x88DDFF,0xFFEEBB,0.9));
+scene.add(new THREE.HemisphereLight(0xA8E8FF,0xFFF0C8,1.05));
 
 // Primary sun — bright, slightly warm white, high noon angle
-const sunL=new THREE.DirectionalLight(0xFFFDF0,2.8);
+const sunL=new THREE.DirectionalLight(0xFFFDF2,3.05);
 sunL.position.set(120,160,80);
 if(!mob){
   sunL.castShadow=true;sunL.shadow.mapSize.set(2048,2048);
@@ -271,14 +279,14 @@ if(!mob){
 scene.add(sunL);
 
 // Bright sky bounce fill — cool blue from opposite side, very present
-const fillL=new THREE.DirectionalLight(0xCCEEFF,0.7);
+const fillL=new THREE.DirectionalLight(0xD8F3FF,0.82);
 fillL.position.set(-80,80,-40);scene.add(fillL);
 
 // Warm second fill — subtle sand/ground bounce
-const groundBounce=new THREE.DirectionalLight(0xFFEEB8,0.22);
+const groundBounce=new THREE.DirectionalLight(0xFFF0BE,0.3);
 groundBounce.position.set(0,-20,60);scene.add(groundBounce);
 
-const playerLight=new THREE.PointLight(0xFFEEDD,0.28,30);
+const playerLight=new THREE.PointLight(0xFFEEDD,0.4,34);
 scene.add(playerLight);
 
 // Volcano glow light (warm orange from below)
@@ -1327,6 +1335,30 @@ function buildVolcano(){
     const p=trailCv.getPoint(i/STEPS);
     platforms.push({pos:new THREE.Vector3(p.x,p.y+0.4,p.z),w:8,d:8,h:p.y+0.4});
   }
+  // Trail details: lamps, signs, and rest spots for clearer climb navigation
+  for(let i=4;i<STEPS;i+=6){
+    const p=trailCv.getPoint(i/STEPS);
+    const dir=trailCv.getTangent(i/STEPS).normalize();
+    const side=new THREE.Vector3(-dir.z,0,dir.x).normalize();
+    const tx=p.x+side.x*4.1,tz=p.z+side.z*4.1;
+    const post=new THREE.Mesh(new THREE.CylinderGeometry(.16,.2,1.8,6),woodM);
+    post.position.set(tx,p.y+1.1,tz);scene.add(post);
+    const lamp=new THREE.Mesh(new THREE.SphereGeometry(.24,8,6),new THREE.MeshStandardMaterial({color:0xFFEE99,emissive:0xFFCC55,emissiveIntensity:0.8}));
+    lamp.position.set(tx,p.y+2.15,tz);scene.add(lamp);
+    const glow=new THREE.PointLight(0xFFCC66,.35,10);glow.position.copy(lamp.position);scene.add(glow);
+    if(i%12===4){
+      const sign=new THREE.Mesh(new THREE.BoxGeometry(1.8,.9,.18),woodM);
+      sign.position.set(p.x-side.x*3.4,p.y+1.5,p.z-side.z*3.4);sign.lookAt(sign.position.x+dir.x,sign.position.y,sign.position.z+dir.z);scene.add(sign);
+    }
+  }
+  // Wii-style lookout props near upper mountain switchbacks
+  for(let i=42;i<=56;i+=7){
+    const p=trailCv.getPoint(i/STEPS);
+    const table=new THREE.Mesh(new THREE.CylinderGeometry(1.2,1.4,.3,10),tileM);table.position.set(p.x+2,p.y+1.4,p.z-2);scene.add(table);
+    const parasolPole=new THREE.Mesh(new THREE.CylinderGeometry(.08,.08,2.2,6),metalM);parasolPole.position.set(p.x+2,p.y+2.4,p.z-2);scene.add(parasolPole);
+    const parasol=new THREE.Mesh(new THREE.ConeGeometry(1.6,.9,10),new THREE.MeshStandardMaterial({color:0xFF5566,roughness:.65}));
+    parasol.position.set(p.x+2,p.y+3.8,p.z-2);scene.add(parasol);
+  }
 
   // ─── LAVA STREAMS ───
   const lavaSt=new THREE.MeshStandardMaterial({color:0xFF3300,roughness:0.4,emissive:0xFF2200,emissiveIntensity:0.5,transparent:true,opacity:0.85});
@@ -2187,6 +2219,32 @@ function mkRing(x,y,z){
       const p=serpCv.getPoint(i/8);
       platforms.push({pos:new THREE.Vector3(p.x,p.y+.5,p.z),w:7,d:6,h:p.y+.5});
     }
+    // Deeper stair descent path with reward room
+    for(let i=0;i<8;i++){
+      const sx=-90.5+i*.75,sy=2.8-i*.9,sz=-194.5-i*2.1;
+      const step=new THREE.Mesh(new THREE.BoxGeometry(3.8,.6,2.1),stoneM);
+      step.position.set(sx,sy,sz);scene.add(step);
+      platforms.push({pos:new THREE.Vector3(sx,sy+.3,sz),w:4,d:2.4,h:sy+.3});
+    }
+    const vaultFloor=new THREE.Mesh(new THREE.CylinderGeometry(9,9,1.2,14),cavFloorM);
+    vaultFloor.position.set(-84,-5,-212);scene.add(vaultFloor);
+    platforms.push({pos:new THREE.Vector3(-84,-4.4,-212),w:18,d:18,h:-4.4});
+    // Gold chests and Wii-inspired treasure props
+    function mkTreasure(x,y,z,c=0xD4AF37){
+      const chest=new THREE.Group();
+      const base=new THREE.Mesh(new THREE.BoxGeometry(2.4,1.1,1.5),new THREE.MeshStandardMaterial({color:0x7A4D22,roughness:.7}));
+      const lid=new THREE.Mesh(new THREE.CylinderGeometry(.75,.75,2.4,10,1,false,0,Math.PI),new THREE.MeshStandardMaterial({color:0x8F5D2A,roughness:.65}));
+      lid.rotation.z=Math.PI/2;lid.position.y=.85;
+      const trim=new THREE.Mesh(new THREE.TorusGeometry(.22,.06,6,12),new THREE.MeshStandardMaterial({color:c,metalness:.85,roughness:.3}));
+      trim.position.set(0,.55,.78);
+      chest.add(base,lid,trim);chest.position.set(x,y,z);scene.add(chest);
+    }
+    mkTreasure(-82.5,-3.8,-212.5);mkTreasure(-86,-3.8,-210.5,0xF6D96A);mkTreasure(-80.8,-3.8,-209.4);
+    const wiiOrb=new THREE.Mesh(new THREE.SphereGeometry(.55,12,10),new THREE.MeshStandardMaterial({color:0x99E8FF,emissive:0x44CCFF,emissiveIntensity:.8}));
+    wiiOrb.position.set(-84,-2.8,-212);scene.add(wiiOrb);
+    const wiiWheel=new THREE.Mesh(new THREE.TorusGeometry(1.1,.18,8,22),new THREE.MeshStandardMaterial({color:0xFFFFFF,roughness:.2,metalness:.3}));
+    wiiWheel.position.set(-87.2,-3.6,-213.5);wiiWheel.rotation.x=1.2;scene.add(wiiWheel);
+    for(let i=0;i<8;i++)mkRing(-88+i*1.2,-2.8,-211.5+Math.sin(i)*1.8);
     // Serpent eye lights
     const serpEye1=new THREE.PointLight(0xFF0000,.8,18);serpEye1.position.set(-90,4,-188);scene.add(serpEye1);
     const serpEye2=new THREE.PointLight(0x00FF44,.6,18);serpEye2.position.set(-88,4,-178);scene.add(serpEye2);
@@ -2208,6 +2266,7 @@ function mkRing(x,y,z){
 
     ZONES.push({name:'Underground Cavern',cx:-85,cz:-165,r:25});
     ZONES.push({name:"Sea Serpent Cavern",cx:-90,cz:-185,r:18});
+    ZONES.push({name:'Serpent Vault',cx:-84,cz:-212,r:14});
   })();
 
   // ── CASTLE INTERIOR PLATFORMS — let player walk inside ──
@@ -2656,8 +2715,24 @@ function doBoost(){
 }
 
 let yaw=0,pitch=.1;const euler=new THREE.Euler(0,0,0,'YXZ');const keys={};
+let flyMode=false;
+const FLY_SPD=34;
+const flyInput={up:false,down:false};
+const flyToggleBtn=document.getElementById('fly-toggle');
+function setFlyMode(next){
+  flyMode=!!next;
+  flyToggleBtn.classList.toggle('on',flyMode);
+  flyToggleBtn.setAttribute('aria-pressed',flyMode?'true':'false');
+  flyToggleBtn.textContent=flyMode?'Fly: ON (G)':'Fly: OFF (G)';
+  if(flyMode){velY=0;onGround=false;}
+}
+flyToggleBtn.addEventListener('click',()=>setFlyMode(!flyMode));
 document.addEventListener('keydown',e=>{
-  if(!keys[e.code]){if(e.code==='Space'&&started){e.preventDefault();doJump();}if((e.code==='ShiftLeft'||e.code==='ShiftRight')&&started)doBoost();}
+  if(!keys[e.code]){
+    if(e.code==='KeyG'&&started){e.preventDefault();setFlyMode(!flyMode);}
+    if(e.code==='Space'&&started&&!flyMode){e.preventDefault();doJump();}
+    if((e.code==='ShiftLeft'||e.code==='ShiftRight')&&started&&!flyMode)doBoost();
+  }
   keys[e.code]=true;if(e.code==='Space')e.preventDefault();
 });
 document.addEventListener('keyup',e=>keys[e.code]=false);
@@ -2680,6 +2755,14 @@ jzz.addEventListener('touchend',e=>{for(const t of e.changedTouches)if(t.identif
 function uJ(t){const r=jbb.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2;let dx=t.clientX-cx,dy=t.clientY-cy;const d2=Math.sqrt(dx*dx+dy*dy),mx=r.width/2-24;if(d2>mx){dx*=mx/d2;dy*=mx/d2;}jss.style.transform=`translate(calc(-50% + ${dx}px),calc(-50% + ${dy}px))`;md.x=dx/mx;md.z=dy/mx;}
 document.getElementById('jmp').addEventListener('touchstart',e=>{e.preventDefault();if(started)doJump();});
 document.getElementById('bst').addEventListener('touchstart',e=>{e.preventDefault();if(started)doBoost();});
+function bindFlyTouch(id,dir){
+  const el=document.getElementById(id);
+  el.addEventListener('touchstart',e=>{e.preventDefault();flyInput[dir]=true;});
+  el.addEventListener('touchend',e=>{e.preventDefault();flyInput[dir]=false;});
+  el.addEventListener('touchcancel',()=>flyInput[dir]=false);
+}
+bindFlyTouch('fup','up');
+bindFlyTouch('fdn','down');
 document.getElementById('sb').addEventListener('click',()=>{
   started=true;document.getElementById('tc').style.display='none';document.getElementById('hud').style.display='flex';
   if(ax)ax.resume();setTimeout(()=>notify('Welcome to Wuhu Island! Follow the gold rings!'),400);
@@ -2835,12 +2918,25 @@ function animate(){
   cam.position.x+=mv.x*curSpeed*slopeFactor*dt;
   cam.position.z+=mv.z*curSpeed*slopeFactor*dt;
 
-  // ── PHYSICS ──
   const EYE=1.8;
+  const nx=cam.position.x,nz=cam.position.z;
+  let bestFloor=Math.max(0,getTerrainHeight(nx,nz));
+  let onPlat=false,platH=-9999;
+  if(flyMode){
+    let yInput=0;
+    if(keys.Space||flyInput.up)yInput+=1;
+    if(keys.ControlLeft||keys.ControlRight||keys.KeyC||flyInput.down)yInput-=1;
+    cam.position.y+=yInput*FLY_SPD*dt;
+    playerY=cam.position.y;
+    velY=0;
+    onGround=false;
+    smoothFloor=cam.position.y;
+  } else {
+
+  // ── PHYSICS ──
   velY+=GRV*dt;
   playerY+=velY*dt;
 
-  const nx=cam.position.x,nz=cam.position.z;
   let terrH=getTerrainHeight(nx,nz);
   if(terrH<0)terrH=0;
 
@@ -2855,7 +2951,7 @@ function animate(){
 
   // ── PLATFORM COLLISION ──
   // p.h is the TOP SURFACE Y. Player lands when feet (playerY-EYE) reach that surface.
-  let platH=-9999;let onPlat=false;
+  platH=-9999;onPlat=false;
   for(const p of platforms){
     const dx2=nx-p.pos.x,dz2=nz-p.pos.z;
     if(Math.abs(dx2)<=p.w/2+.9&&Math.abs(dz2)<=p.d/2+.9){
@@ -2868,7 +2964,7 @@ function animate(){
   }
 
   // Best floor: terrain or platform, whichever is higher at player position
-  const bestFloor=onPlat&&platH>terrH?platH:terrH;
+  bestFloor=onPlat&&platH>terrH?platH:terrH;
   const floorEye=bestFloor+EYE;
 
   // Smooth floor lerp (removes jitter on uneven ground)
@@ -2894,12 +2990,7 @@ function animate(){
   cam.position.x=Math.max(-298,Math.min(258,cam.position.x));
   cam.position.z=Math.max(-220,Math.min(298,cam.position.z));
 
-  // Ocean/cliff fall respawn
-  if(playerY<-18||(Math.sqrt(nx*nx+(nz-28)*(nz-28))>225&&playerY<5)){
-    const rh=getTerrainHeight(106,55)+EYE;
-    playerY=rh;smoothFloor=rh;velY=0;onGround=true;jumpCount=0;boosting=false;
-    cam.position.set(106,rh,55);
-    notify('Swept into the sea! Back to the Harbor.');
+  // Automatic respawn is intentionally disabled for full-map exploration.
   }
 
   euler.set(pitch,yaw,0,'YXZ');cam.quaternion.setFromEuler(euler);
@@ -2957,7 +3048,7 @@ function animate(){
       `PLAT near:${np}  on:${onPlat}  h:${platH.toFixed(1)}\n`+
       `ZONE ${curZone}\n`+
       `RING ${goldRings}/${rObjs.length}\n`+
-      `[F3]=hide  [Shift+R]=respawn`;
+      `[F3]=hide  [G]=fly ${flyMode?'ON':'OFF'}  [Shift+R]=respawn`;
   }
 
   R.render(scene,cam);
