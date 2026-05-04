@@ -7,8 +7,8 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{width:100%;height:100%;overflow:hidden;background:#55CCFF;touch-action:none;-webkit-user-select:none;user-select:none}
-canvas{display:block;filter:saturate(1.14) brightness(1.06)}
-#vignette{position:fixed;inset:0;pointer-events:none;z-index:2;background:radial-gradient(ellipse at 50% 40%,rgba(255,255,255,0) 38%,rgba(200,235,255,.06) 70%,rgba(160,210,255,.12) 100%)}
+canvas{display:block;filter:saturate(1.2) brightness(1.09) contrast(1.04)}
+#vignette{position:fixed;inset:0;pointer-events:none;z-index:2;background:radial-gradient(ellipse at 50% 38%,rgba(255,255,255,0) 32%,rgba(190,230,255,.05) 62%,rgba(140,198,255,.15) 100%)}
 #hud{position:fixed;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:flex-start;padding:10px 16px;pointer-events:none;z-index:10;flex-wrap:wrap;gap:6px}
 #left-hud{display:flex;flex-direction:column;gap:5px}
 #rc{font-family:'Arial Rounded MT Bold',Arial,sans-serif;font-size:22px;font-weight:900;color:#FFD700;text-shadow:2px 2px 0 #996600,0 0 10px rgba(255,200,0,.4);display:flex;align-items:center;gap:6px}
@@ -133,27 +133,29 @@ const sandTx=mkT(256,256,(d,w)=>{
 });sandTx.repeat.set(18,18);
 
 // Wii Sports golf course grass — vivid bright green, subtle mow stripes
-const grassTx=mkT(256,256,(d,w,h)=>{
+const grassTx=mkT(512,512,(d,w,h)=>{
   for(let y=0;y<h;y++)for(let x=0;x<w;x++){
     const p=(y*w+x)*4;
-    // Alternating mow stripes every 16px (dark/light green bands)
-    const stripe=Math.floor(y/16)%2;
-    const base=stripe?210:195;
-    const n=(Math.random()-.5)*16;
-    const blade=Math.sin(x*.22)*4+Math.cos(y*.18)*3;
-    d[p]  =Math.min(255,Math.max(0,48 +n*.2+blade*.1));
-    d[p+1]=Math.min(255,Math.max(0,base+n   +blade  ));
-    d[p+2]=Math.min(255,Math.max(0,40 +n*.15+blade*.1));
+    const stripe=Math.floor((x+y*.35)/18)%2;
+    const base=stripe?214:190;
+    const n=(Math.random()-.5)*12;
+    const blade=Math.sin(x*.38)*3+Math.cos(y*.24)*2.6+Math.sin((x+y)*.14)*1.8;
+    const vein=((x%17===0||y%19===0)?-10:0);
+    d[p]  =Math.min(255,Math.max(0,54+n*.2+blade*.12+vein*.15));
+    d[p+1]=Math.min(255,Math.max(0,base+n+blade+vein));
+    d[p+2]=Math.min(255,Math.max(0,42+n*.2+blade*.16+vein*.25));
     d[p+3]=255;
   }
-});grassTx.repeat.set(22,22);
+});grassTx.repeat.set(28,28);
 
-const stoneTx=mkT(128,128,(d)=>{
+const stoneTx=mkT(256,256,(d,w,h)=>{
   for(let i=0;i<d.length;i+=4){
-    const n=(Math.random()-.5)*50,c=Math.random()<.04?-22:0,crack=Math.random()<.006?-38:0;
-    d[i]=Math.min(255,Math.max(0,145+n+c+crack));
-    d[i+1]=Math.min(255,Math.max(0,140+n+c+crack));
-    d[i+2]=Math.min(255,Math.max(0,132+n*.8+c+crack));d[i+3]=255;
+    const px=(i/4)%w,py=((i/4)/w)|0;
+    const n=(Math.random()-.5)*36,c=Math.random()<.03?-18:0,crack=(Math.sin(px*.12)+Math.cos(py*.1)>1.65)?-30:0;
+    const strata=Math.sin((px+py)*.04)*8+Math.cos(py*.06)*6;
+    d[i]=Math.min(255,Math.max(0,156+n+c+crack+strata));
+    d[i+1]=Math.min(255,Math.max(0,148+n*.9+c+crack+strata*.9));
+    d[i+2]=Math.min(255,Math.max(0,136+n*.75+c+crack+strata*.7));d[i+3]=255;
   }
 });
 
@@ -241,9 +243,9 @@ const thatchTx=mkT(128,128,(d,w,h)=>{
 // ══════════════════════════════════════════════════════
 const scene=new THREE.Scene();
 // Super Mario Galaxy 2 — brilliant cerulean sky
-scene.background=new THREE.Color(0x55CCFF);
+scene.background=new THREE.Color(0x5CCEFF);
 // Bright sky-tinted haze, very light so distant land stays visible
-scene.fog=new THREE.FogExp2(0x88DDFF,0.00085);
+scene.fog=new THREE.FogExp2(0xA5E7FF,0.00072);
 
 const cam=new THREE.PerspectiveCamera(72,innerWidth/innerHeight,.5,1000);
 cam.position.set(90,6,65);// Harbor dock start
@@ -256,17 +258,17 @@ if(R.shadowMap.enabled)R.shadowMap.type=THREE.PCFSoftShadowMap;
 R.outputColorSpace=THREE.SRGBColorSpace;
 R.toneMapping=THREE.ACESFilmicToneMapping;
 // Slightly higher exposure — SMG2 feels bright and overexposed-crisp
-R.toneMappingExposure=1.08;
+R.toneMappingExposure=1.16;
 document.body.appendChild(R.domElement);
 
 // ══════════════════════════════════════════════════════
 // LIGHTING — Super Mario Galaxy 2 bright tropical day
 // ══════════════════════════════════════════════════════
 // Hemisphere: vivid sky-blue from above (SMG2 sky colour), warm peach-gold from below
-scene.add(new THREE.HemisphereLight(0x88DDFF,0xFFEEBB,0.9));
+scene.add(new THREE.HemisphereLight(0xA8E8FF,0xFFF0C8,1.05));
 
 // Primary sun — bright, slightly warm white, high noon angle
-const sunL=new THREE.DirectionalLight(0xFFFDF0,2.8);
+const sunL=new THREE.DirectionalLight(0xFFFDF2,3.05);
 sunL.position.set(120,160,80);
 if(!mob){
   sunL.castShadow=true;sunL.shadow.mapSize.set(2048,2048);
@@ -277,14 +279,14 @@ if(!mob){
 scene.add(sunL);
 
 // Bright sky bounce fill — cool blue from opposite side, very present
-const fillL=new THREE.DirectionalLight(0xCCEEFF,0.7);
+const fillL=new THREE.DirectionalLight(0xD8F3FF,0.82);
 fillL.position.set(-80,80,-40);scene.add(fillL);
 
 // Warm second fill — subtle sand/ground bounce
-const groundBounce=new THREE.DirectionalLight(0xFFEEB8,0.22);
+const groundBounce=new THREE.DirectionalLight(0xFFF0BE,0.3);
 groundBounce.position.set(0,-20,60);scene.add(groundBounce);
 
-const playerLight=new THREE.PointLight(0xFFEEDD,0.28,30);
+const playerLight=new THREE.PointLight(0xFFEEDD,0.4,34);
 scene.add(playerLight);
 
 // Volcano glow light (warm orange from below)
