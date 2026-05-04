@@ -7,7 +7,7 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{width:100%;height:100%;overflow:hidden;background:#55CCFF;touch-action:none;-webkit-user-select:none;user-select:none}
-canvas{display:block;filter:saturate(1.14) brightness(1.05) contrast(1.03)}
+canvas{display:block;filter:saturate(1.2) brightness(1.09) contrast(1.04)}
 #vignette{position:fixed;inset:0;pointer-events:none;z-index:2;background:radial-gradient(ellipse at 50% 38%,rgba(255,255,255,0) 32%,rgba(190,230,255,.05) 62%,rgba(140,198,255,.15) 100%)}
 #hud{position:fixed;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:flex-start;padding:10px 16px;pointer-events:none;z-index:10;flex-wrap:wrap;gap:6px}
 #left-hud{display:flex;flex-direction:column;gap:5px}
@@ -248,9 +248,9 @@ const thatchTx=mkT(128,128,(d,w,h)=>{
 // ══════════════════════════════════════════════════════
 const scene=new THREE.Scene();
 // Super Mario Galaxy 2 — brilliant cerulean sky
-scene.background=new THREE.Color(0x56C7F2);
+scene.background=new THREE.Color(0x5CCEFF);
 // Bright sky-tinted haze, very light so distant land stays visible
-scene.fog=new THREE.FogExp2(0x94DDF8,0.0008);
+scene.fog=new THREE.FogExp2(0xA5E7FF,0.00072);
 
 const cam=new THREE.PerspectiveCamera(72,innerWidth/innerHeight,.5,1000);
 cam.position.set(90,6,65);// Harbor dock start
@@ -263,17 +263,17 @@ if(R.shadowMap.enabled)R.shadowMap.type=THREE.PCFSoftShadowMap;
 R.outputColorSpace=THREE.SRGBColorSpace;
 R.toneMapping=THREE.ACESFilmicToneMapping;
 // Slightly higher exposure — SMG2 feels bright and overexposed-crisp
-R.toneMappingExposure=1.08;
+R.toneMappingExposure=1.16;
 document.body.appendChild(R.domElement);
 
 // ══════════════════════════════════════════════════════
 // LIGHTING — Super Mario Galaxy 2 bright tropical day
 // ══════════════════════════════════════════════════════
 // Hemisphere: vivid sky-blue from above (SMG2 sky colour), warm peach-gold from below
-scene.add(new THREE.HemisphereLight(0x9EDFFF,0xF6E4BE,0.92));
+scene.add(new THREE.HemisphereLight(0xA8E8FF,0xFFF0C8,1.05));
 
 // Primary sun — bright, slightly warm white, high noon angle
-const sunL=new THREE.DirectionalLight(0xFFF8E8,2.65);
+const sunL=new THREE.DirectionalLight(0xFFFDF2,3.05);
 sunL.position.set(120,160,80);
 if(!mob){
   sunL.castShadow=true;sunL.shadow.mapSize.set(2048,2048);
@@ -284,14 +284,14 @@ if(!mob){
 scene.add(sunL);
 
 // Bright sky bounce fill — cool blue from opposite side, very present
-const fillL=new THREE.DirectionalLight(0xCFEAFF,0.62);
+const fillL=new THREE.DirectionalLight(0xD8F3FF,0.82);
 fillL.position.set(-80,80,-40);scene.add(fillL);
 
 // Warm second fill — subtle sand/ground bounce
-const groundBounce=new THREE.DirectionalLight(0xF6E7BE,0.2);
+const groundBounce=new THREE.DirectionalLight(0xFFF0BE,0.3);
 groundBounce.position.set(0,-20,60);scene.add(groundBounce);
 
-const playerLight=new THREE.PointLight(0xFFEEDD,0.24,28);
+const playerLight=new THREE.PointLight(0xFFEEDD,0.4,34);
 scene.add(playerLight);
 
 // Volcano glow light (warm orange from below)
@@ -2722,7 +2722,6 @@ function doBoost(){
 let yaw=0,pitch=.1;const euler=new THREE.Euler(0,0,0,'YXZ');const keys={};
 let flyMode=false;
 const FLY_SPD=34;
-const flyInput={up:false,down:false};
 const flyToggleBtn=document.getElementById('fly-toggle');
 function setFlyMode(next){
   flyMode=!!next;
@@ -2929,8 +2928,8 @@ function animate(){
   let onPlat=false,platH=-9999;
   if(flyMode){
     let yInput=0;
-    if(keys.Space||flyInput.up)yInput+=1;
-    if(keys.ControlLeft||keys.ControlRight||keys.KeyC||flyInput.down)yInput-=1;
+    if(keys.Space)yInput+=1;
+    if(keys.ControlLeft||keys.ControlRight||keys.KeyC)yInput-=1;
     cam.position.y+=yInput*FLY_SPD*dt;
     playerY=cam.position.y;
     velY=0;
