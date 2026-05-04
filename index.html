@@ -121,16 +121,18 @@ function mkT(w,h,fn){
   const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;return t;
 }
 
-const sandTx=mkT(256,256,(d,w)=>{
+const sandTx=mkT(512,512,(d,w,h)=>{
   for(let i=0;i<d.length/4;i++){
-    const p=i*4,n=(Math.random()-.5)*36,grit=Math.random()<.03?-26:0;
-    const px=i%w,py=i/w|0,dune=Math.sin(px*.04)*5+Math.cos(py*.03)*3;
-    d[p]=Math.min(255,Math.max(0,238+n+grit+dune));
-    d[p+1]=Math.min(255,Math.max(0,215+n*.9+grit+dune*.8));
-    d[p+2]=Math.min(255,Math.max(0,162+n*.55+grit*.5+dune*.4));
+    const p=i*4,n=(Math.random()-.5)*30,grit=Math.random()<.028?-22:0;
+    const px=i%w,py=i/w|0;
+    const dune=Math.sin(px*.032)*6+Math.cos(py*.026)*4+Math.sin((px+py)*.018)*4;
+    const warm=Math.sin(py*.09)*5;
+    d[p]=Math.min(255,Math.max(0,226+n+grit+dune+warm));
+    d[p+1]=Math.min(255,Math.max(0,203+n*.85+grit+dune*.78+warm*.8));
+    d[p+2]=Math.min(255,Math.max(0,148+n*.52+grit*.46+dune*.34+warm*.5));
     d[p+3]=255;
   }
-});sandTx.repeat.set(18,18);
+});sandTx.repeat.set(20,20);
 
 // Wii Sports golf course grass — vivid bright green, subtle mow stripes
 const grassTx=mkT(512,512,(d,w,h)=>{
@@ -160,12 +162,15 @@ const stoneTx=mkT(256,256,(d,w,h)=>{
 });
 
 // Volcanic rock — dark grey-brown
-const volcTx=mkT(128,128,(d)=>{
+const volcTx=mkT(256,256,(d,w,h)=>{
   for(let i=0;i<d.length;i+=4){
-    const n=(Math.random()-.5)*40,hot=Math.random()<.012?60:0;
-    d[i]=Math.min(255,Math.max(0,65+n+hot));
-    d[i+1]=Math.min(255,Math.max(0,55+n*.5+hot*.3));
-    d[i+2]=Math.min(255,Math.max(0,50+n*.4));d[i+3]=255;
+    const px=(i/4)%w,py=((i/4)/w)|0;
+    const n=(Math.random()-.5)*28;
+    const ridge=Math.sin(px*.08)*12+Math.cos(py*.06)*10;
+    const vein=((px%27<2)?-16:0)+((py%23<2)?-10:0);
+    d[i]=Math.min(255,Math.max(0,170+n+ridge+vein));
+    d[i+1]=Math.min(255,Math.max(0,150+n*.8+ridge*.85+vein*.7));
+    d[i+2]=Math.min(255,Math.max(0,112+n*.6+ridge*.55+vein*.5));d[i+3]=255;
   }
 });
 
