@@ -303,9 +303,10 @@ volcGlow.position.set(-20,20,-80);scene.add(volcGlow);
 // ══════════════════════════════════════════════════════
 const sandM=new THREE.MeshStandardMaterial({map:sandTx,roughness:0.93,metalness:0.0,color:0xF0DCA8});
 // SMG2 grass — very vivid saturated green, almost lime-green bright
-const grassM=new THREE.MeshStandardMaterial({map:grassTx,roughness:0.85,metalness:0.0,color:0x6ED040});
+const grassM=new THREE.MeshStandardMaterial({map:grassTx,roughness:0.86,metalness:0.0,color:0x66C943});
+const fairwayM=new THREE.MeshStandardMaterial({map:fairwayTx,roughness:0.84,metalness:0.0,color:0x7DD35B});
 const stoneM=new THREE.MeshStandardMaterial({map:stoneTx,roughness:0.87,metalness:0.02,color:0xCCBFAA});
-const volcM=new THREE.MeshStandardMaterial({map:volcTx,roughness:0.92,metalness:0.04,color:0x554844});
+const volcM=new THREE.MeshStandardMaterial({map:volcTx,roughness:0.9,metalness:0.02,color:0xC8B27E});
 const woodM=new THREE.MeshStandardMaterial({map:woodTx,roughness:0.86,metalness:0.0});
 const tileM=new THREE.MeshStandardMaterial({map:tileTx,roughness:0.82,metalness:0.0});
 const castleM=new THREE.MeshStandardMaterial({map:castleTx,roughness:0.8,metalness:0.02,color:0xD8D0C8});
@@ -337,8 +338,8 @@ const thatchM=new THREE.MeshStandardMaterial({map:thatchTx,roughness:0.95,metaln
 const waterShaderMat=new THREE.ShaderMaterial({
   uniforms:{
     uTime:{value:0},
-    uDeep:{value:new THREE.Color(0x0055BB)},
-    uShallow:{value:new THREE.Color(0x00FFD8)},
+    uDeep:{value:new THREE.Color(0x006EC8)},
+    uShallow:{value:new THREE.Color(0x21DCCF)},
     uSunDir:{value:new THREE.Vector3(.55,.82,.15).normalize()},
     uOpacity:{value:0.88}
   },
@@ -521,10 +522,16 @@ shoreOverlay.rotation.x=-Math.PI/2;shoreOverlay.position.set(0,.05,40);scene.add
 //   SW: The Candle sea stack (x=-110, z=140)
 //   Mid-W: Forest/hills
 // ══════════════════════════════════════════════════════
+function addCliffSkirt(x,y,z,topR,botR,h,seg,mat){
+  const skirt=new THREE.Mesh(new THREE.CylinderGeometry(topR,botR,h,seg,1,true),mat);
+  skirt.position.set(x,y,z);skirt.castShadow=true;skirt.receiveShadow=true;scene.add(skirt);
+}
+
 function buildIsland(){
   // ─── MAIN BODY — large grass island base ───
   const main=new THREE.Mesh(new THREE.CylinderGeometry(195,210,9,36),grassM);
   main.position.set(0,-.5,30);main.receiveShadow=true;scene.add(main);
+  addCliffSkirt(0,-.55,30,195,210,9,36,stoneM);
   platforms.push({pos:new THREE.Vector3(0,4,30),w:390,d:420,h:4});
 
   // ─── BEACH AREA (SW) — Sugarsand, Starry, Sweet Beaches ───
@@ -558,40 +565,40 @@ function buildIsland(){
   // This is the region at the foot of Maka Wuhu, below the falls
   // Multiple overlapping hills for smooth gradient feel
   const hill1=new THREE.Mesh(new THREE.CylinderGeometry(65,80,10,18),grassM);
-  hill1.position.set(10,4,30);hill1.castShadow=true;scene.add(hill1);
+  hill1.position.set(10,4,30);hill1.castShadow=true;scene.add(hill1);addCliffSkirt(10,4,30,65,80,10,18,stoneM);
   platforms.push({pos:new THREE.Vector3(10,9,30),w:120,d:120,h:9});
 
   const hill2=new THREE.Mesh(new THREE.CylinderGeometry(50,65,14,16),grassM);
-  hill2.position.set(-5,6,0);hill2.castShadow=true;scene.add(hill2);
+  hill2.position.set(-5,6,0);hill2.castShadow=true;scene.add(hill2);addCliffSkirt(-5,6,0,50,65,14,16,stoneM);
   platforms.push({pos:new THREE.Vector3(-5,13,0),w:95,d:95,h:13});
 
   const hill3=new THREE.Mesh(new THREE.CylinderGeometry(40,55,16,14),grassM);
-  hill3.position.set(-12,9,-25);hill3.castShadow=true;scene.add(hill3);
+  hill3.position.set(-12,9,-25);hill3.castShadow=true;scene.add(hill3);addCliffSkirt(-12,9,-25,40,55,16,14,stoneM);
   platforms.push({pos:new THREE.Vector3(-12,17,-25),w:75,d:75,h:17});
 
   const hill4=new THREE.Mesh(new THREE.CylinderGeometry(32,48,18,14),grassM);
-  hill4.position.set(-15,12,-45);hill4.castShadow=true;scene.add(hill4);
+  hill4.position.set(-15,12,-45);hill4.castShadow=true;scene.add(hill4);addCliffSkirt(-15,12,-45,32,48,18,14,stoneM);
   platforms.push({pos:new THREE.Vector3(-15,21,-45),w:60,d:60,h:21});
 
   // ─── MAKA WUHU VOLCANO — north center, gradual tiered ascent ───
   // Tier 1 — broad grassy volcanic base (Mountain Area starts here)
   const volcBase=new THREE.Mesh(new THREE.CylinderGeometry(90,112,20,22),grassM);
-  volcBase.position.set(-14,8,-72);volcBase.castShadow=true;volcBase.receiveShadow=true;scene.add(volcBase);
+  volcBase.position.set(-14,8,-72);volcBase.castShadow=true;volcBase.receiveShadow=true;scene.add(volcBase);addCliffSkirt(-14,8,-72,90,112,20,22,stoneM);
   platforms.push({pos:new THREE.Vector3(-14,18,-72),w:175,d:175,h:18});
 
   // Tier 2 — rocky transition, dark volcanic rock starts
   const volcTier2=new THREE.Mesh(new THREE.CylinderGeometry(68,88,18,20),volcM);
-  volcTier2.position.set(-14,22,-74);volcTier2.castShadow=true;scene.add(volcTier2);
+  volcTier2.position.set(-14,22,-74);volcTier2.castShadow=true;scene.add(volcTier2);addCliffSkirt(-14,22,-74,68,88,18,20,volcM);
   platforms.push({pos:new THREE.Vector3(-14,31,-74),w:130,d:130,h:31});
 
   // Tier 3 — steeper mid-section
   const volcMid=new THREE.Mesh(new THREE.CylinderGeometry(50,66,22,18),volcM);
-  volcMid.position.set(-13,35,-78);volcMid.castShadow=true;scene.add(volcMid);
+  volcMid.position.set(-13,35,-78);volcMid.castShadow=true;scene.add(volcMid);addCliffSkirt(-13,35,-78,50,66,22,18,volcM);
   platforms.push({pos:new THREE.Vector3(-13,46,-78),w:95,d:95,h:46});
 
   // Tier 4 — upper steep cone
   const volcUpper=new THREE.Mesh(new THREE.CylinderGeometry(30,48,24,16),volcM);
-  volcUpper.position.set(-12,51,-80);volcUpper.castShadow=true;scene.add(volcUpper);
+  volcUpper.position.set(-12,51,-80);volcUpper.castShadow=true;scene.add(volcUpper);addCliffSkirt(-12,51,-80,30,48,24,16,volcM);
   platforms.push({pos:new THREE.Vector3(-12,63,-80),w:55,d:55,h:63});
 
   // Tier 5 — summit narrow peak
@@ -1023,7 +1030,7 @@ buildPromenade();
 // Flanked by Wii-style lollipop sphere trees.
 // ══════════════════════════════════════════════════════
 (function buildGolfTrail(){
-  const fairM=new THREE.MeshStandardMaterial({map:sandTx,roughness:.9,color:0xD0B878});
+  const fairM=fairwayM;
 
   // Wii lollipop tree — single large sphere, clean and stylised
   function wiiTree(x,y,z,s){
